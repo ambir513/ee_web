@@ -1,0 +1,48 @@
+{
+  "name": "Admin Panel",
+  "list": [
+    {
+      "name": "Products",
+      "list": [
+        {
+          "title": "Create Product",
+          "url": "#",
+          "icon": "ImagePlus"
+        },
+        {
+          "title": "Products List",
+          "url": "#",
+          "icon": "List"
+        },
+        {
+          "title": "Edit Product",
+          "url": "#",
+          "icon": "SquarePen"
+        }
+      ]
+    },
+    {
+      "name": "Orders",
+      "list": [
+        {
+          "title": "Orders List",
+          "url": "#",
+          "icon": "Inbox"
+        },
+        {
+          "title": "Orders Status",
+          "url": "#",
+          "icon": "Calendar"
+        }
+      ]
+    },
+    {
+      "name": "Settings",
+      "list": [
+        { "title": "General", "url": "#", "icon": "Settings" },
+        { "title": "Search", "url": "#", "icon": "Search" },
+        { "title": "Home Page", "url": "#", "icon": "Home" }
+      ]
+    }
+  ]
+}
