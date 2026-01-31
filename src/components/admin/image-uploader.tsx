@@ -5,9 +5,12 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { CloudUpload, ImageIcon } from "lucide-react";
+import { CloudUpload } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+/* --------------------------------------------------
+ * TYPES
+ * -------------------------------------------------- */
 interface ImageFile {
   id: string;
   file: File;
@@ -17,53 +20,59 @@ interface ImageFile {
   error?: string;
 }
 
-interface ImageUploadProps {
-  maxFiles?: number;
-  maxSize?: number;
-  accept?: string;
-  className?: string;
-  onImagesChange?: (images: ImageFile[]) => void;
-  onUploadComplete?: (images: ImageFile[]) => void;
-}
-
-export function ImageUpload({
-  maxFiles = 5,
-  maxSize = 10 * 1024 * 1024,
-  accept = "image/*",
-  className,
-  onImagesChange,
-  onUploadComplete,
-}: ImageUploadProps) {
+/* --------------------------------------------------
+ * COMPONENT
+ * -------------------------------------------------- */
+export function ImageUpload() {
   const [images, setImages] = useState<ImageFile[]>([]);
-  const [isDragging, setIsDragging] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
+  const [isDragging, setIsDragging] = useState(false);
 
+  /* --------------------------------------------------
+   * VALIDATION
+   * -------------------------------------------------- */
   const validateFile = (file: File): string | null => {
-    if (!file.type.startsWith("image/")) return "File must be an image";
-    if (file.size > maxSize)
-      return `File size must be less than ${(maxSize / 1024 / 1024).toFixed(
-        1,
-      )}MB`;
-    if (images.length >= maxFiles) return `Maximum ${maxFiles} files allowed`;
+    if (!file.type.startsWith("image/")) return "Only image files allowed";
+    if (file.size > 10 * 1024 * 1024) return "Max file size is 10MB";
     return null;
   };
 
-  const fetchSignature = async () => {
+  /* --------------------------------------------------
+   * FETCH SIGNATURE (MATCHES BACKEND)
+   * -------------------------------------------------- */
+  const fetchSignature = async (): Promise<{
+    timestamp: number;
+    signature: string;
+  }> => {
     const res = await fetch(
       "http://localhost:5000/api/v1/cloudinary/signature",
+      { credentials: "include" },
     );
+
     if (!res.ok) throw new Error("Failed to fetch signature");
-    return res.json();
+
+    const json = await res.json();
+
+    if (!json?.data?.timestamp || !json?.data?.signature) {
+      throw new Error("Invalid signature payload");
+    }
+
+    return json.data;
   };
 
+  /* --------------------------------------------------
+   * UPLOAD TO CLOUDINARY (PARAMS MUST MATCH SIGNED PARAMS)
+   * -------------------------------------------------- */
   const uploadToCloudinary = async (
-    imageFile: ImageFile,
-    signatureData: { timestamp: string; signature: string },
+    img: ImageFile,
+    signature: { timestamp: number; signature: string },
   ) => {
     const formData = new FormData();
-    formData.append("file", imageFile.file);
-    formData.append("timestamp", signatureData.timestamp);
-    formData.append("signature", signatureData.signature);
+
+    formData.append("file", img.file);
+    formData.append("timestamp", String(signature.timestamp));
+    formData.append("folder", "products"); // 🔥 MUST MATCH BACKEND SIGNING
+    formData.append("signature", signature.signature);
     formData.append("api_key", "142188283175534");
 
     try {
@@ -73,95 +82,92 @@ export function ImageUpload({
       });
 
       setImages((prev) =>
-        prev.map((img) =>
-          img.id === imageFile.id
-            ? { ...img, progress: 100, status: "completed" }
-            : img,
+        prev.map((i) =>
+          i.id === img.id ? { ...i, status: "completed", progress: 100 } : i,
         ),
       );
-
-      onUploadComplete?.(images);
     } catch (err: any) {
       setImages((prev) =>
-        prev.map((img) =>
-          img.id === imageFile.id
-            ? { ...img, status: "error", error: err.message }
-            : img,
+        prev.map((i) =>
+          i.id === img.id ? { ...i, status: "error", error: err.message } : i,
         ),
       );
     }
   };
 
-  const addImages = useCallback(
-    async (files: FileList | File[]) => {
-      const newImages: ImageFile[] = [];
-      const newErrors: string[] = [];
+  /* --------------------------------------------------
+   * ADD FILES
+   * -------------------------------------------------- */
+  const addImages = useCallback(async (files: FileList) => {
+    const valid: ImageFile[] = [];
+    const errs: string[] = [];
 
-      Array.from(files).forEach((file) => {
-        const error = validateFile(file);
-        if (error) {
-          newErrors.push(`${file.name}: ${error}`);
-          return;
-        }
+    Array.from(files).forEach((file) => {
+      const err = validateFile(file);
+      if (err) {
+        errs.push(`${file.name}: ${err}`);
+        return;
+      }
 
-        newImages.push({
-          id: crypto.randomUUID(),
-          file,
-          preview: URL.createObjectURL(file),
-          progress: 0,
-          status: "uploading",
-        });
+      valid.push({
+        id: crypto.randomUUID(),
+        file,
+        preview: URL.createObjectURL(file),
+        progress: 0,
+        status: "uploading",
       });
+    });
 
-      if (newErrors.length) {
-        setErrors((prev) => [...prev, ...newErrors]);
-      }
+    if (errs.length) setErrors(errs);
+    if (!valid.length) return;
 
-      if (newImages.length) {
-        const updated = [...images, ...newImages];
-        setImages(updated);
-        onImagesChange?.(updated);
+    setImages((prev) => [...prev, ...valid]);
 
-        const signature = await fetchSignature();
-        newImages.forEach((img) => uploadToCloudinary(img, signature));
-      }
-    },
-    [images, maxFiles, maxSize, onImagesChange],
-  );
+    const signature = await fetchSignature();
 
+    valid.forEach((img) => uploadToCloudinary(img, signature));
+  }, []);
+
+  /* --------------------------------------------------
+   * RENDER
+   * -------------------------------------------------- */
   return (
-    <div className={cn("w-full max-w-4xl", className)}>
-      {/* Uploaded Images Grid */}
+    <div className="max-w-4xl">
+      {/* PREVIEW GRID */}
       {images.length > 0 && (
-        <div className="grid grid-cols-4 gap-2.5 mb-6">
-          {images.map((img, i) => (
-            <Card key={img.id} className="bg-accent/50 shadow-none rounded-md">
-              <img
-                src={img.preview}
-                alt={`Image ${i + 1}`}
-                className="h-[120px] w-full object-cover rounded-md"
-              />
-            </Card>
+        <div className="grid grid-cols-4 gap-3 mb-6">
+          {images.map((img) => (
+            <img
+              key={img.id}
+              src={img.preview}
+              className="h-[120px] w-full object-cover rounded-md"
+            />
           ))}
         </div>
       )}
 
-      {/* Upload Area */}
+      {/* DROP ZONE */}
       <Card
         className={cn(
-          "border-dashed shadow-none rounded-md",
+          "border-dashed shadow-none rounded-md transition",
           isDragging
-            ? "border-primary bg-primary/5"
-            : "border-muted-foreground/25",
+            ? "border-primary bg-primary/10"
+            : "border-muted-foreground/30",
         )}
+        onDragEnter={(e) => {
+          e.preventDefault();
+          setIsDragging(true);
+        }}
         onDragOver={(e) => e.preventDefault()}
+        onDragLeave={() => setIsDragging(false)}
         onDrop={(e) => {
           e.preventDefault();
+          setIsDragging(false);
           addImages(e.dataTransfer.files);
         }}
       >
-        <CardContent className="text-center">
-          <CloudUpload className="mx-auto mb-3 size-4" />
+        <CardContent className="text-center py-8">
+          <CloudUpload className="mx-auto mb-3 size-5" />
           <p className="text-sm mb-3">Drag & drop images or click browse</p>
           <Button
             size="sm"
@@ -169,7 +175,7 @@ export function ImageUpload({
               const input = document.createElement("input");
               input.type = "file";
               input.multiple = true;
-              input.accept = accept;
+              input.accept = "image/*";
               input.onchange = (e: any) => addImages(e.target.files);
               input.click();
             }}
@@ -179,12 +185,12 @@ export function ImageUpload({
         </CardContent>
       </Card>
 
-      {/* Progress */}
+      {/* PROGRESS */}
       {images.map((img) => (
         <Progress key={img.id} value={img.progress} className="mt-3" />
       ))}
 
-      {/* Errors */}
+      {/* ERRORS */}
       {errors.length > 0 && (
         <Alert variant="error" className="mt-5">
           <AlertTitle>Upload error</AlertTitle>
@@ -197,11 +203,4 @@ export function ImageUpload({
       )}
     </div>
   );
-}
-
-function formatBytes(bytes: number) {
-  if (!bytes) return "0 Bytes";
-  const k = 1024;
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return `${(bytes / Math.pow(k, i)).toFixed(1)} ${["B", "KB", "MB", "GB"][i]}`;
 }
