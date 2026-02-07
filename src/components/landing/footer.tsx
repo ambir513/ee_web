@@ -13,13 +13,13 @@ const footerLinks = {
     { name: "Collections", href: "#" },
   ],
   help: [
-    { name: "Contact Us", href: "#" },
+    { name: "Contact Us", href: "/contact" },
     { name: "FAQs", href: "#" },
     { name: "Shipping Info", href: "#" },
     { name: "Returns", href: "#" },
   ],
   company: [
-    { name: "About Us", href: "#" },
+    { name: "About Us", href: "/about" },
     { name: "Our Artisans", href: "#" },
     { name: "Sustainability", href: "#" },
     { name: "Careers", href: "#" },

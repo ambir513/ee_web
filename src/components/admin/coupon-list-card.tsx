@@ -8,7 +8,18 @@ import {
   CardDescription,
   CardPanel,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogPortal,
+  AlertDialogBackdrop,
+  AlertDialogPopup,
+  AlertDialogHeader,
+  AlertDialogFooter,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogClose,
+} from "@/components/ui/alert-dialog";
 import { api } from "@/lib/api";
 import {
   Loader2,
@@ -19,6 +30,7 @@ import {
   Tag,
   AlertCircle,
   Plus,
+  Pencil,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
@@ -40,6 +52,8 @@ export default function CouponListCard() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [couponToDelete, setCouponToDelete] = useState<Coupon | null>(null);
 
   const fetchCoupons = useCallback(async () => {
     setIsLoading(true);
@@ -65,9 +79,20 @@ export default function CouponListCard() {
     fetchCoupons();
   }, [fetchCoupons]);
 
-  const handleDelete = async (couponId: string) => {
-    if (!confirm("Are you sure you want to delete this coupon?")) return;
+  const openDeleteDialog = (coupon: Coupon) => {
+    setCouponToDelete(coupon);
+    setDeleteDialogOpen(true);
+  };
 
+  const closeDeleteDialog = () => {
+    setDeleteDialogOpen(false);
+    setCouponToDelete(null);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!couponToDelete) return;
+
+    const couponId = couponToDelete._id;
     setDeletingId(couponId);
 
     try {
@@ -75,6 +100,7 @@ export default function CouponListCard() {
 
       if (response?.status) {
         setCoupons((prev) => prev.filter((c) => c._id !== couponId));
+        closeDeleteDialog();
       } else {
         alert(response?.message || "Failed to delete coupon");
       }
@@ -111,9 +137,7 @@ export default function CouponListCard() {
               <Ticket className="size-6" />
               Coupons
             </CardTitle>
-            <CardDescription>
-              Manage your discount coupons
-            </CardDescription>
+            <CardDescription>Manage your discount coupons</CardDescription>
           </div>
           <Link href="/admin/coupon/create">
             <Button size="sm">
@@ -163,7 +187,7 @@ export default function CouponListCard() {
                   key={coupon._id}
                   className={cn(
                     "flex items-center gap-4 p-4 transition-colors",
-                    expired && "opacity-50"
+                    expired && "opacity-50",
                   )}
                 >
                   {/* Coupon Icon */}
@@ -172,7 +196,7 @@ export default function CouponListCard() {
                       "flex items-center justify-center size-12 rounded-lg",
                       coupon.isActive && !expired
                         ? "bg-green-500/10 text-green-600"
-                        : "bg-muted text-muted-foreground"
+                        : "bg-muted text-muted-foreground",
                     )}
                   >
                     <Tag className="size-5" />
@@ -208,31 +232,87 @@ export default function CouponListCard() {
                       <span>Min ₹{coupon.minOrderValue}</span>
                       <span className="flex items-center gap-1">
                         <Calendar className="size-3" />
-                        {formatDate(coupon.validFrom)} - {formatDate(coupon.validTill)}
+                        {formatDate(coupon.validFrom)} -{" "}
+                        {formatDate(coupon.validTill)}
                       </span>
                     </div>
                   </div>
 
                   {/* Actions */}
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                    onClick={() => handleDelete(coupon._id)}
-                    disabled={deletingId === coupon._id}
-                  >
-                    {deletingId === coupon._id ? (
-                      <Loader2 className="size-4 animate-spin" />
-                    ) : (
-                      <Trash2 className="size-4" />
-                    )}
-                  </Button>
+                  <div className="flex items-center gap-1">
+                    <Link href={`/admin/coupon/${coupon._id}/edit`}>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        aria-label="Edit coupon"
+                      >
+                        <Pencil className="size-4" />
+                      </Button>
+                    </Link>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                      onClick={() => openDeleteDialog(coupon)}
+                      disabled={deletingId === coupon._id}
+                      aria-label="Delete coupon"
+                    >
+                      {deletingId === coupon._id ? (
+                        <Loader2 className="size-4 animate-spin" />
+                      ) : (
+                        <Trash2 className="size-4" />
+                      )}
+                    </Button>
+                  </div>
                 </div>
               );
             })}
           </div>
         )}
       </CardPanel>
+
+      <AlertDialog
+        open={deleteDialogOpen}
+        onOpenChange={(open) => {
+          setDeleteDialogOpen(open);
+          if (!open) setCouponToDelete(null);
+        }}
+      >
+        <AlertDialogPortal>
+          <AlertDialogBackdrop />
+          <AlertDialogPopup>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete Coupon</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to delete the coupon{" "}
+                <strong>{couponToDelete?.code}</strong>? This action cannot be
+                undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogClose
+                className={cn(buttonVariants({ variant: "outline" }))}
+              >
+                Cancel
+              </AlertDialogClose>
+              <Button
+                variant="destructive"
+                onClick={handleConfirmDelete}
+                disabled={deletingId !== null}
+              >
+                {deletingId ? (
+                  <>
+                    <Loader2 className="mr-2 size-4 animate-spin" />
+                    Deleting...
+                  </>
+                ) : (
+                  "Delete"
+                )}
+              </Button>
+            </AlertDialogFooter>
+          </AlertDialogPopup>
+        </AlertDialogPortal>
+      </AlertDialog>
     </Card>
   );
 }

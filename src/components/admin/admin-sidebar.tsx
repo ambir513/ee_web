@@ -26,18 +26,13 @@ const items = [
     list: [
       {
         title: "Create Product",
-        url: "#",
+        url: "/admin/product/create",
         icon: ImagePlus,
       },
       {
         title: "Products List",
-        url: "#",
+        url: "/admin/product",
         icon: List,
-      },
-      {
-        title: "Edit Product",
-        url: "#",
-        icon: SquarePen,
       },
     ],
   },
@@ -61,12 +56,12 @@ const items = [
     list: [
       {
         title: "Create Coupons",
-        url: "#",
+        url: "/admin/coupon/create",
         icon: ImagePlus,
       },
       {
         title: "Coupons List",
-        url: "#",
+        url: "/admin/coupon",
         icon: List,
       },
     ],

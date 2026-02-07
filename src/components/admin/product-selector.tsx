@@ -51,7 +51,11 @@ export function ProductSelector({
       const response = await api.get(`/product/filter?${params.toString()}`);
 
       if (response?.status && response.data) {
-        setProducts(response.data);
+        // API returns { products, total }; support legacy array shape
+        const list = Array.isArray(response.data)
+          ? response.data
+          : (response.data as { products?: Product[] })?.products ?? [];
+        setProducts(Array.isArray(list) ? list : []);
       } else {
         setError("Failed to load products");
       }
