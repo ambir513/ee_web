@@ -19,6 +19,9 @@ import {
 
 import { Banner } from "@/components/ui/banner";
 import { InfiniteSlider } from "../ui/infinite-slider";
+import { useQuery } from "@tanstack/react-query";
+import { api } from "@/lib/api";
+// import UserDropdown from "./user-dropdown";
 
 export const gradientColors = [
   "rgba(0,149,255,0.56)",
@@ -37,6 +40,13 @@ const links = [
 
 export function Header() {
   const [scrolled, setScrolled] = useState(false);
+  const { data, isLoading, isError, error } = useQuery({
+    queryKey: ["getUser"],
+    queryFn: async () => {
+      const response = await api.get("/account/me");
+      return response;
+    },
+  });
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 80);
@@ -111,12 +121,12 @@ export function Header() {
 
             {/* Desktop CTA */}
             <div className="hidden sm:flex gap-x-3  sm:items-center sm:gap-x-4 ">
-              <ShoppingBag />
-              <div className="text-white">
-                <Button render={<Link href="/event-enquiry"></Link>}>
-                  Shop Now
-                </Button>
-              </div>
+         
+                  <ShoppingBag />
+                  <Button render={<Link href="/event-enquiry"></Link>}>
+                    Shop Now
+                  </Button>
+                
             </div>
 
             {/* Mobile Menu */}
