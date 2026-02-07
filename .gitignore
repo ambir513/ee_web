@@ -12,6 +12,8 @@
 
 # testing
 /coverage
+.cursorignore
+.agents
 
 # next.js
 /.next/

@@ -8,7 +8,7 @@ import Link from "next/link";
 import { OTPForm } from "./otp-form";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { set, z } from "zod";
+import { z } from "zod";
 import Logo from "@/utils/logo";
 import { SignupSchema } from "./type";
 import { api } from "@/lib/api";

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { ToastProvider } from "@/components/ui/toast";
+import { TanstackQueryProvider } from "@/utils/tanstack-query";
 
 const _inter = Inter({
   subsets: ["latin"],
@@ -30,8 +31,10 @@ export default function RootLayout({
       <body
         className={`${_inter.className} ${_playfairDisplay.variable} antialiased`}
       >
-        {children}
-        <ToastProvider />
+        <TanstackQueryProvider>
+          {children}
+          <ToastProvider />
+        </TanstackQueryProvider>
       </body>
     </html>
   );

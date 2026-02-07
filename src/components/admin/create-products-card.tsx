@@ -28,9 +28,26 @@ import {
 import { Button } from "../ui/button";
 import { VariantSheet } from "./variant-sheet";
 import { api } from "@/lib/api";
+import { ImageUpload } from "./image-uploader";
+import { Loader2, CheckCircle2 } from "lucide-react";
+
+interface ProductFormData {
+  name: string;
+  description: string;
+  productInformation: string;
+  category: string;
+  subCategory: string;
+  price: string;
+  mrp: string;
+  isActive: boolean;
+  design: string;
+  label: string;
+  sku: string;
+  images: string[];
+}
 
 export default function CreateProductCard() {
-  const [data, setData] = useState<Record<string, any>>({
+  const [data, setData] = useState<ProductFormData>({
     name: "",
     description: "",
     productInformation: "",
@@ -42,6 +59,7 @@ export default function CreateProductCard() {
     design: "",
     label: "",
     sku: "",
+    images: [],
   });
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -49,43 +67,148 @@ export default function CreateProductCard() {
   const [response, setResponse] = useState<{ id: string }>({
     id: "",
   });
+  const [error, setError] = useState<string | null>(null);
+
+  const handleImagesChange = (images: string[]) => {
+    setData((prev) => ({ ...prev, images }));
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const finalData = {
-      ...data,
-      price: Number(data.price),
-      mrp: Number(data.mrp),
-      category: data.category?.toString().toUpperCase(),
-      subCategory: data.subCategory?.toString().toUpperCase(),
-    };
-    const response = await api.post("/admin/product/create", finalData);
-    if (!response?.status) {
-      alert("Error creating product");
-      return;
+    setError(null);
+    setIsLoading(true);
+
+    try {
+      const finalData = {
+        ...data,
+        price: Number(data.price),
+        mrp: Number(data.mrp),
+        category: data.category?.toString().toUpperCase(),
+        subCategory: data.subCategory?.toString().toUpperCase(),
+      };
+
+      const response = await api.post("/admin/product/create", finalData);
+
+      if (!response?.status) {
+        setError(response?.message || "Error creating product");
+        setIsLoading(false);
+        return;
+      }
+
+      console.log("Product created:", response);
+      // MongoDB returns _id, not id
+      setResponse({ id: response.data._id || response.data.id });
+      setIsSuccess(true);
+    } catch (err) {
+      console.error("Error creating product:", err);
+      setError("Failed to create product. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
-    console.log("Product created:", response);
-    setResponse({ id: response.data.id });
-    setIsSuccess(true);
   };
 
+  const handleReset = () => {
+    setData({
+      name: "",
+      description: "",
+      productInformation: "",
+      category: "",
+      subCategory: "",
+      price: "",
+      mrp: "",
+      isActive: false,
+      design: "",
+      label: "",
+      sku: "",
+      images: [],
+    });
+    setIsSuccess(false);
+    setResponse({ id: "" });
+    setError(null);
+  };
+
+  // If product was created successfully, show success view with VariantSheet
+  if (isSuccess) {
+    console.log("Success state - Product ID:", response.id);
+    
+    return (
+      <Card className="mx-5 sm:mx-auto sm:max-w-2xl shadow-lg">
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-2xl font-bold">Product Created!</CardTitle>
+          <CardDescription>
+            Your product has been created successfully. Now add variants to it.
+          </CardDescription>
+        </CardHeader>
+        <CardPanel>
+          <div className="space-y-4">
+            <div className="flex flex-col items-center justify-center gap-2 p-4 bg-green-500/10 border border-green-500/20 rounded-lg">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="size-5 text-green-500" />
+                <p className="text-green-600 font-medium">
+                  Product created successfully!
+                </p>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Product ID: {response.id || "Not available"}
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <Button
+                type="button"
+                variant="outline"
+                className="flex-1"
+                onClick={handleReset}
+              >
+                Create Another Product
+              </Button>
+              <VariantSheet
+                isOpen={isOpen}
+                setIsOpen={setIsOpen}
+                productId={response.id}
+              />
+            </div>
+          </div>
+        </CardPanel>
+      </Card>
+    );
+  }
+
   return (
-    <Card className="mx-5 sm:mx-auto sm:max-w-2xl">
-      <CardHeader>
-        <CardTitle>Create Product</CardTitle>
-        <CardDescription>Fill in the product details below.</CardDescription>
+    <Card className="mx-5 sm:mx-auto sm:max-w-2xl shadow-lg">
+      <CardHeader className="space-y-1">
+        <CardTitle className="text-2xl font-bold">Create Product</CardTitle>
+        <CardDescription>
+          Fill in the product details below to add a new item to your store.
+        </CardDescription>
       </CardHeader>
       <CardPanel>
-        <Form className="grid gap-4 sm:grid-cols-2" onSubmit={handleSubmit}>
+        <Form className="grid gap-5 sm:grid-cols-2" onSubmit={handleSubmit}>
+          {/* Image Upload Section */}
+          <div className="sm:col-span-2">
+            <Field>
+              <FieldLabel>Product Images</FieldLabel>
+              <FieldItem className="w-full mt-2">
+                <ImageUpload
+                  onImagesChange={handleImagesChange}
+                  maxImages={5}
+                  initialImages={data.images}
+                />
+              </FieldItem>
+              <FieldDescription>
+                Upload up to 5 product images. First image will be the main
+                display.
+              </FieldDescription>
+            </Field>
+          </div>
+
           {/* Category */}
           <Field>
             <FieldLabel htmlFor="category">Category</FieldLabel>
             <FieldItem className="w-full">
               <Select
                 name="category"
-                defaultValue="WOMEN"
                 value={data.category}
-                onValueChange={(value) => setData({ ...data, category: value })}
+                onValueChange={(value) => value && setData({ ...data, category: value })}
               >
                 <SelectTrigger aria-label="Category">
                   <SelectValue placeholder="Select category" />
@@ -114,20 +237,22 @@ export default function CreateProductCard() {
                 }
               />
             </FieldItem>
-            <FieldDescription>Choose the product type.</FieldDescription>
+            <FieldDescription>
+              E.g., Kurta, Shirt, Dress, etc.
+            </FieldDescription>
           </Field>
 
+          {/* Design */}
           <Field>
             <FieldLabel htmlFor="design">Design</FieldLabel>
             <FieldItem className="w-full">
               <Select
                 name="design"
-                defaultValue="MEN"
                 value={data.design}
-                onValueChange={(value) => setData({ ...data, design: value })}
+                onValueChange={(value) => value && setData({ ...data, design: value })}
               >
-                <SelectTrigger aria-label="Category">
-                  <SelectValue placeholder="Select category" />
+                <SelectTrigger aria-label="Design">
+                  <SelectValue placeholder="Select design" />
                 </SelectTrigger>
                 <SelectPopup>
                   <SelectItem value="Floral Print">Floral Print</SelectItem>
@@ -143,9 +268,10 @@ export default function CreateProductCard() {
                 </SelectPopup>
               </Select>
             </FieldItem>
-            <FieldDescription>Select the main design.</FieldDescription>
+            <FieldDescription>Select the design pattern.</FieldDescription>
           </Field>
 
+          {/* Label */}
           <Field>
             <FieldLabel htmlFor="label">Label</FieldLabel>
             <FieldItem className="w-full">
@@ -157,17 +283,19 @@ export default function CreateProductCard() {
                 onChange={(e) => setData({ ...data, label: e.target.value })}
               />
             </FieldItem>
-            <FieldDescription>Choose the product label.</FieldDescription>
+            <FieldDescription>
+              E.g., "New Arrival", "Bestseller"
+            </FieldDescription>
           </Field>
 
           {/* Name */}
           <Field className="sm:col-span-2">
-            <FieldLabel htmlFor="name">Name</FieldLabel>
+            <FieldLabel htmlFor="name">Product Name</FieldLabel>
             <FieldItem className="w-full">
               <Input
                 id="name"
                 name="name"
-                placeholder="Classic Cotton T-Shirt"
+                placeholder="Classic Cotton Kurta Set"
                 value={data.name}
                 onChange={(e) => setData({ ...data, name: e.target.value })}
               />
@@ -175,15 +303,15 @@ export default function CreateProductCard() {
           </Field>
 
           {/* Description */}
-          <Field className="sm:col-span-2 ">
+          <Field className="sm:col-span-2">
             <FieldLabel htmlFor="description">Description</FieldLabel>
             <FieldItem className="w-full">
               <Textarea
                 id="description"
                 name="description"
-                placeholder="Soft and breathable cotton t-shirt for daily wear."
+                placeholder="Elegant and comfortable kurta set perfect for festive occasions..."
                 value={data.description}
-                className="w-full"
+                className="w-full min-h-[100px]"
                 onChange={(e) =>
                   setData({ ...data, description: e.target.value })
                 }
@@ -200,8 +328,9 @@ export default function CreateProductCard() {
               <Textarea
                 id="productInformation"
                 name="productInformation"
-                placeholder="100% cotton, machine washable, regular fit."
+                placeholder="Material: 100% Cotton&#10;Care: Machine washable&#10;Fit: Regular fit"
                 value={data.productInformation}
+                className="min-h-[80px]"
                 onChange={(e) =>
                   setData({ ...data, productInformation: e.target.value })
                 }
@@ -211,7 +340,7 @@ export default function CreateProductCard() {
 
           {/* Price */}
           <Field>
-            <FieldLabel htmlFor="price">Price</FieldLabel>
+            <FieldLabel htmlFor="price">Selling Price (₹)</FieldLabel>
             <FieldItem className="w-full">
               <Input
                 id="price"
@@ -219,7 +348,7 @@ export default function CreateProductCard() {
                 type="number"
                 onChange={(e) => setData({ ...data, price: e.target.value })}
                 min={0}
-                placeholder="799"
+                placeholder="1299"
                 value={data.price}
               />
             </FieldItem>
@@ -227,47 +356,57 @@ export default function CreateProductCard() {
 
           {/* MRP */}
           <Field>
-            <FieldLabel htmlFor="mrp">MRP</FieldLabel>
+            <FieldLabel htmlFor="mrp">MRP (₹)</FieldLabel>
             <FieldItem className="w-full">
               <Input
                 id="mrp"
                 name="mrp"
                 type="number"
                 min={0}
-                placeholder="999"
+                placeholder="1999"
                 value={data.mrp}
                 onChange={(e) => setData({ ...data, mrp: e.target.value })}
               />
             </FieldItem>
           </Field>
 
-          <Field>
+          {/* SKU */}
+          <Field className="sm:col-span-2">
             <FieldLabel htmlFor="sku">SKU</FieldLabel>
             <FieldItem className="w-full">
               <Input
                 id="sku"
                 name="sku"
                 type="text"
-                min={0}
-                placeholder="Secret code"
+                placeholder="KURTA-W-001"
                 value={data.sku}
                 onChange={(e) => setData({ ...data, sku: e.target.value })}
               />
             </FieldItem>
+            <FieldDescription>
+              Unique stock keeping unit identifier.
+            </FieldDescription>
           </Field>
 
-          <div className="my-3 gap-y-4 flex flex-col w-full items-center justify-between col-span-2">
-            {isSuccess ? (
-              <VariantSheet
-                isOpen={isOpen}
-                setIsOpen={setIsOpen}
-                productId={response.id}
-              />
-            ) : (
-              <Button type="submit" className="w-full">
-                Create Product
-              </Button>
-            )}
+          {/* Error Message */}
+          {error && (
+            <div className="sm:col-span-2 p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
+              <p className="text-sm text-destructive">{error}</p>
+            </div>
+          )}
+
+          {/* Submit Section */}
+          <div className="my-4 sm:col-span-2">
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 size-4 animate-spin" />
+                  Creating Product...
+                </>
+              ) : (
+                "Create Product"
+              )}
+            </Button>
           </div>
         </Form>
       </CardPanel>
