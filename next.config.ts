@@ -7,6 +7,11 @@ const nextConfig = {
         hostname: "fashor.com",
         pathname: "/cdn/shop/**",
       },
+      {
+        protocol: "https",
+        hostname: "res.cloudinary.com",
+        pathname: "/**",
+      },
     ],
   },
 };
