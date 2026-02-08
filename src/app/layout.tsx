@@ -29,7 +29,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${_inter.className} ${_playfairDisplay.variable} antialiased`}
+        className={`${_inter.className} ${_playfairDisplay.variable} antialiased bg-secondary`}
       >
         <TanstackQueryProvider>
           {children}

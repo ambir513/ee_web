@@ -81,25 +81,15 @@ export function Header() {
 
       {/* Header */}
       <header
-        className={`w-full p-4 border-b bg-background transition-all duration-300
+        className={`w-full py-4 sm:px-4 px-2 border-b bg-background transition-all duration-300
         ${scrolled ? "fixed top-0 shadow-md z-50" : ""}`}
       >
-        <nav className="max-w-7xl mx-4 2xl:mx-auto">
-          <div className="flex items-center justify-between">
+        <nav className="max-w-7xl pr-4 2xl:mx-auto">
+          <div className="flex items-center justify-between  h-10">
             {/* Logo + Links */}
-            <div className="flex items-center gap-x-5">
-              <Link href="/">
-                <Image
-                  src="/logo.jpeg"
-                  alt="Ethnic Elegance Logo"
-                  width={35}
-                  height={35}
-                  priority
-                  className="rounded-lg active:scale-95 transition-transform"
-                />
-              </Link>
 
-              <ul className="hidden sm:flex space-x-6">
+            <div className="flex items-center gap-x-5">
+              <ul className="hidden text-sm sm:flex space-x-6">
                 {links.map((link) => (
                   <li key={link.id}>
                     <Link
@@ -119,20 +109,7 @@ export function Header() {
               </ul>
             </div>
 
-            {/* Desktop CTA */}
-            <div className="hidden sm:flex gap-x-3 text-white  sm:items-center sm:gap-x-4 ">
-         
-                  <ShoppingBag />
-                  <Button render={<Link href="/products"></Link>}>
-                    Shop Now
-                  </Button>
-                
-            </div>
-
-            {/* Mobile Menu */}
-            <div className="flex sm:hidden items-center gap-x-4">
-              <ShoppingBag />
-
+            <div className="sm:hidden">
               <Sheet>
                 <SheetTrigger>
                   <Menu className="text-muted-foreground" />
@@ -179,6 +156,30 @@ export function Header() {
                   </SheetFooter>
                 </SheetContent>
               </Sheet>
+            </div>
+
+            <div className="flex  justify-center items-center gap-x-2">
+              <Link href="/">
+                <div className="flex flex-col justify-center items-center gap-x-2">
+                  <h1 className="text-2xl text-primary font-serif font-bold">
+                    Ethnic Elegance
+                  </h1>
+                  <p className="text-xs/1 font-primary">
+                    Where tradition meets style
+                  </p>
+                </div>
+              </Link>
+            </div>
+
+            {/* Desktop CTA */}
+            <div className="hidden sm:flex gap-x-3 text-white  sm:items-center sm:gap-x-4 ">
+              <ShoppingBag />
+              <Button render={<Link href="/products"></Link>}>Shop Now</Button>
+            </div>
+
+            {/* Mobile Menu */}
+            <div className="flex sm:hidden items-center gap-x-4">
+              <ShoppingBag />
             </div>
           </div>
         </nav>
