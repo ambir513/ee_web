@@ -21,6 +21,7 @@ import { Banner } from "@/components/ui/banner";
 import { InfiniteSlider } from "../ui/infinite-slider";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
+import UserDropdown from "./user-dropdown";
 // import UserDropdown from "./user-dropdown";
 
 export const gradientColors = [
@@ -173,7 +174,11 @@ export function Header() {
 
             {/* Desktop CTA */}
             <div className="hidden sm:flex gap-x-3 text-white  sm:items-center sm:gap-x-4 ">
-              <ShoppingBag />
+              {data?.status ? (
+                <UserDropdown user={data.data} />
+              ) : (
+                <ShoppingBag />
+              )}
               <Button render={<Link href="/products"></Link>}>Shop Now</Button>
             </div>
 
