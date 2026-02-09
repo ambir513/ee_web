@@ -22,7 +22,6 @@ import { InfiniteSlider } from "../ui/infinite-slider";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import UserDropdown from "./user-dropdown";
-import { ProductSearchBar } from "@/components/search/product-search-bar";
 
 export const gradientColors = [
   "rgba(0,149,255,0.56)",
