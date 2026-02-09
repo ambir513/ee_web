@@ -10,7 +10,7 @@ import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 const banners = [
   {
     id: 1,
-    image: "/images/kurta-1.jpg",
+    image: "/images/kurta-1.png",
     label: "Spring / Summer 2026",
     title: "Where tradition meets modern elegance",
     description:
@@ -19,7 +19,7 @@ const banners = [
   },
   {
     id: 2,
-    image: "/images/hero-2.jpg",
+    image: "/images/kurta-2.jpg",
     label: "Exclusive Collection",
     title: "Silk kurtas crafted for grace",
     description:
@@ -28,7 +28,7 @@ const banners = [
   },
   {
     id: 3,
-    image: "/images/hero-3.jpg",
+    image: "/images/kurta-3.jpg",
     label: "Everyday Elegance",
     title: "Cotton comfort, timeless style",
     description:
@@ -37,7 +37,7 @@ const banners = [
   },
   {
     id: 4,
-    image: "/images/hero-4.jpg",
+    image: "/images/kurta-4.jpg",
     label: "Festive Edit",
     title: "Celebrate in stunning kurtas",
     description:

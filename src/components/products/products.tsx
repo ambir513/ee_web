@@ -173,12 +173,17 @@ function FilterSection({
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h3 className="font-semibold">Filters</h3>
+      <div className="flex items-center justify-between border-b pb-3">
+        <div>
+          <h3 className="text-sm font-semibold tracking-tight">Filters</h3>
+          <p className="text-muted-foreground mt-1 text-xs">
+            Refine products by category, design, price & rating.
+          </p>
+        </div>
         <Button
           variant="ghost"
           size="sm"
-          className="h-8 text-xs"
+          className="h-8 text-xs px-2 text-muted-foreground hover:text-foreground"
           onClick={resetFilters}
         >
           <X className="mr-1 h-3 w-3" />
@@ -187,14 +192,16 @@ function FilterSection({
       </div>
 
       {/* Category */}
-      <div>
-        <Label className="mb-2 block text-sm font-medium">Category</Label>
+      <div className="space-y-2 rounded-lg border bg-muted/40 p-3">
+        <Label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          Category
+        </Label>
         <Select
           value={filters.category || ""}
           onValueChange={(v) => handleFilterChange("category", v)}
         >
           <SelectTrigger className="h-9" aria-label="Category">
-            <SelectValue placeholder="Select category" />
+            <SelectValue placeholder="All categories" />
           </SelectTrigger>
           <SelectContent>
             {CATEGORIES.map((c) => (
@@ -204,11 +211,27 @@ function FilterSection({
             ))}
           </SelectContent>
         </Select>
+        <div className="flex flex-wrap gap-2 pt-1">
+          {CATEGORIES.filter((c) => c.value).map((c) => (
+            <Button
+              key={c.value}
+              type="button"
+              size="sm"
+              variant={filters.category === c.value ? "default" : "outline"}
+              className="h-7 rounded-full px-3 text-xs"
+              onClick={() => handleFilterChange("category", c.value)}
+            >
+              {c.label}
+            </Button>
+          ))}
+        </div>
       </div>
 
       {/* Sub Category */}
-      <div>
-        <Label className="mb-2 block text-sm font-medium">Sub Category</Label>
+      <div className="space-y-2 rounded-lg border bg-muted/40 p-3">
+        <Label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          Sub Category
+        </Label>
         <Input
           className="h-9"
           placeholder="e.g. Kurta, Shirt"
@@ -218,14 +241,16 @@ function FilterSection({
       </div>
 
       {/* Design */}
-      <div>
-        <Label className="mb-2 block text-sm font-medium">Design</Label>
+      <div className="space-y-2 rounded-lg border bg-muted/40 p-3">
+        <Label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          Design
+        </Label>
         <Select
           value={filters.design || ""}
           onValueChange={(v) => handleFilterChange("design", v)}
         >
           <SelectTrigger className="h-9" aria-label="Design">
-            <SelectValue placeholder="Select design" />
+            <SelectValue placeholder="All designs" />
           </SelectTrigger>
           <SelectContent>
             {DESIGNS.map((d) => (
@@ -238,14 +263,16 @@ function FilterSection({
       </div>
 
       {/* Rating */}
-      <div>
-        <Label className="mb-2 block text-sm font-medium">Rating</Label>
+      <div className="space-y-2 rounded-lg border bg-muted/40 p-3">
+        <Label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          Rating
+        </Label>
         <Select
           value={filters.rating || ""}
           onValueChange={(v) => handleFilterChange("rating", v)}
         >
           <SelectTrigger className="h-9" aria-label="Rating">
-            <SelectValue placeholder="Minimum rating" />
+            <SelectValue placeholder="Any rating" />
           </SelectTrigger>
           <SelectContent>
             {RATINGS.map((r) => (
@@ -258,10 +285,15 @@ function FilterSection({
       </div>
 
       {/* Price */}
-      <div>
-        <Label className="mb-2 block text-sm font-medium">
-          Price Range (₹)
-        </Label>
+      <div className="space-y-3 rounded-lg border bg-muted/40 p-3">
+        <div className="flex items-center justify-between gap-2">
+          <Label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            Price Range (₹)
+          </Label>
+          <span className="text-muted-foreground text-[11px]">
+            Set a minimum & maximum budget
+          </span>
+        </div>
         <div className="flex gap-2">
           <Input
             type="number"
@@ -284,10 +316,10 @@ function FilterSection({
         <Button
           variant="secondary"
           size="sm"
-          className="mt-2 w-full"
+          className="mt-1 w-full"
           onClick={onApplyFilters}
         >
-          Apply Filters
+          Apply price filter
         </Button>
       </div>
     </div>
@@ -361,10 +393,10 @@ export default function ProductList() {
   const totalPages = Math.max(1, Math.ceil(totalProducts / pageSize));
 
   return (
-    <div className="px-4 py-4 sm:py-6">
+    <div className="px-4 py-4 sm:py-8">
       <div className="flex flex-col gap-6 lg:flex-row">
         <aside className="hidden w-64 shrink-0 lg:block">
-          <div className="sticky top-4 rounded-lg border bg-card p-4">
+          <div className="sticky top-4 rounded-xl border bg-card/80 p-4 shadow-sm backdrop-blur">
             <FilterSection
               filters={filters}
               setFilters={setFilters}
@@ -375,7 +407,37 @@ export default function ProductList() {
 
         <main className="min-w-0 flex-1">
           <div className="mb-4 flex flex-col gap-4 sm:mb-6">
-            <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <h1 className="text-xl font-semibold tracking-tight sm:text-2xl">
+                  Shop all products
+                </h1>
+                <p className="text-muted-foreground mt-1 text-sm">
+                  Discover curated styles across men, women & kids.
+                </p>
+              </div>
+              <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
+                {!isLoading && totalProducts > 0 && (
+                  <span className="rounded-full bg-muted px-3 py-1">
+                    Showing{" "}
+                    <span className="font-medium text-foreground">
+                      {(((filters.page ?? 1) - 1) * pageSize) + 1}
+                    </span>{" "}
+                    -{" "}
+                    <span className="font-medium text-foreground">
+                      {Math.min((filters.page ?? 1) * pageSize, totalProducts)}
+                    </span>{" "}
+                    of{" "}
+                    <span className="font-medium text-foreground">
+                      {totalProducts}
+                    </span>{" "}
+                    items
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg border bg-card/70 px-3 py-2.5 sm:px-4 sm:py-3">
               <div className="flex items-center gap-3">
                 <Sheet
                   open={mobileFiltersOpen}
@@ -406,8 +468,10 @@ export default function ProductList() {
                     </ScrollArea>
                   </SheetContent>
                 </Sheet>
-                <span className="text-muted-foreground text-sm">
-                  {isLoading ? "Loading..." : `${totalProducts} products`}
+                <span className="text-muted-foreground text-xs sm:text-sm">
+                  {isLoading
+                    ? "Fetching the latest styles..."
+                    : `${totalProducts} products`}
                 </span>
               </div>
               <ToggleGroup

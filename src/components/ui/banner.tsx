@@ -52,8 +52,8 @@ export function Banner({
       case "minimal":
         return {
           container: hasGradient
-            ? "sticky top-0 z-50 w-full border-b backdrop-blur supports-[backdrop-filter]:bg-card/60"
-            : "sticky top-0 z-50 w-full border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60",
+            ? "sticky top-0 z-50 w-full border-b bg-secondary backdrop-blur supports-[backdrop-filter]:bg-card/60"
+            : "sticky top-0 z-50 w-full border-b bg-card/95  backdrop-blur supports-[backdrop-filter]:bg-card/60",
           wrapper:
             "relative container mx-auto flex flex-col sm:flex-row md:items-start items-center justify-center px-3 sm:px-4 py-2 gap-2 sm:gap-4 max-w-2xl",
           content:

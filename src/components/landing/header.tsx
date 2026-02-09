@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowUpRight, Menu, ShoppingBag } from "lucide-react";
+import { ArrowUpRight, Menu, ShoppingBag, User } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -22,7 +22,7 @@ import { InfiniteSlider } from "../ui/infinite-slider";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import UserDropdown from "./user-dropdown";
-// import UserDropdown from "./user-dropdown";
+import { ProductSearchBar } from "@/components/search/product-search-bar";
 
 export const gradientColors = [
   "rgba(0,149,255,0.56)",
@@ -41,6 +41,7 @@ const links = [
 
 export function Header() {
   const [scrolled, setScrolled] = useState(false);
+
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["getUser"],
     queryFn: async () => {
@@ -56,7 +57,7 @@ export function Header() {
   }, []);
 
   return (
-    <div className="w-full z-50">
+    <div className="w-full z-50 bg-secondary    ">
       {/* Banner + Offer Slider */}
       <div
         className={`transition-all space-y-2 duration-300 ease-in-out
@@ -69,7 +70,7 @@ export function Header() {
           gradientColors={gradientColors}
         />
 
-        <section className="overflow-hidden leading-5">
+        <section className="overflow-hidden leading-5 pb-2">
           <InfiniteSlider speedOnHover={20} speed={40} gap={112}>
             <p>
               Apply Code: <strong>500OFF</strong> – Get ₹500 off on minimum
@@ -80,113 +81,266 @@ export function Header() {
         </section>
       </div>
 
-      {/* Header */}
+      {/* Main Header */}
       <header
-        className={`w-full py-4 sm:px-4 px-2 border-b bg-background transition-all duration-300
+        className={`w-full border-b border-border bg-background/80 backdrop-blur-sm transition-all duration-300
         ${scrolled ? "fixed top-0 shadow-md z-50" : ""}`}
       >
-        <nav className="max-w-7xl pr-4 2xl:mx-auto">
-          <div className="flex items-center justify-between  h-10">
-            {/* Logo + Links */}
+        <nav className="max-w-7xl mx-auto px-2 sm:px-4">
+          {/* Top row: logo, navigation, user actions */}
+          <div className="flex items-center justify-between gap-4 py-3">
+            {/* Left: mobile menu + logo */}
+            <div className="flex items-center gap-3">
+              <div className="md:hidden">
+                <Sheet>
+                  <SheetTrigger
+                    render={
+                      <Button
+                        aria-label="Open navigation"
+                        variant={"outline"}
+                        className="inline-flex h-10 w-10 items-center justify-center rounded-full border  text-muted-foreground hover:bg-accent transition-colors"
+                      >
+                        <Menu className="size-5" />
+                      </Button>
+                    }
+                  ></SheetTrigger>
 
-            <div className="flex items-center gap-x-5">
-              <ul className="hidden text-sm sm:flex space-x-6">
-                {links.map((link) => (
-                  <li key={link.id}>
-                    <Link
-                      href={link.href}
-                      target={link.arrowUp ? "_blank" : "_self"}
-                      className="text-muted-foreground flex items-center gap-x-1"
-                    >
-                      <span className="hover:text-primary relative">
-                        {link.title}
-                        {link.arrowUp && (
-                          <ArrowUpRight className="size-2.5 absolute -right-3 top-0" />
-                        )}
-                      </span>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
+                  <SheetContent
+                    side="left"
+                    className="flex h-screen max-h-screen flex-col justify-between px-0"
+                  >
+                    <div className="space-y-6 px-6 pt-4 pb-6">
+                      <SheetHeader className="items-start text-left">
+                        <SheetTitle className="flex items-center gap-x-3">
+                          <Image
+                            src="/logo.jpeg"
+                            alt="Ethnic Elegance Logo"
+                            width={40}
+                            height={40}
+                            className="rounded-lg"
+                          />
+                          <div className="flex flex-col gap-0.5">
+                            <span className="text-lg font-serif font-semibold">
+                              Ethnic Elegance
+                            </span>
+                            <span className="text-xs text-muted-foreground">
+                              Curated ethnic wear for every occasion
+                            </span>
+                          </div>
+                        </SheetTitle>
+                      </SheetHeader>
 
-            <div className="sm:hidden">
-              <Sheet>
-                <SheetTrigger>
-                  <Menu className="text-muted-foreground" />
-                </SheetTrigger>
+                      <div className="space-y-5">
+                        <div>
+                          <p className="mb-3 text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
+                            Shop
+                          </p>
+                          <ul className="space-y-3">
+                            {links.map((link) => (
+                              <li key={link.id}>
+                                <SheetClose
+                                  render={
+                                    <Link
+                                      href={link.href}
+                                      target={link.arrowUp ? "_blank" : "_self"}
+                                      className="flex items-center justify-between text-sm text-muted-foreground hover:text-foreground"
+                                    >
+                                      <span>{link.title}</span>
+                                      {link.arrowUp && (
+                                        <ArrowUpRight className="size-3" />
+                                      )}
+                                    </Link>
+                                  }
+                                />
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
 
-                <SheetContent side="left">
-                  <SheetHeader>
-                    <SheetTitle className="flex items-center gap-x-3">
-                      <Image
-                        src="/logo.jpeg"
-                        alt="Ethnic Elegance Logo"
-                        width={35}
-                        height={35}
-                        className="rounded-lg"
-                      />
-                      Ethnic Elegance
-                    </SheetTitle>
-                    <SheetDescription>
-                      Find the perfect ethnic wear for every occasion.
-                    </SheetDescription>
-                  </SheetHeader>
+                        <div className="border-t border-border pt-4">
+                          <p className="mb-3 text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
+                            Help & Info
+                          </p>
+                          <ul className="space-y-2 text-sm text-muted-foreground">
+                            <li>
+                              <SheetClose
+                                render={
+                                  <Link
+                                    href="/contact"
+                                    className="hover:text-foreground"
+                                  >
+                                    Contact us
+                                  </Link>
+                                }
+                              />
+                            </li>
+                            <li>
+                              <SheetClose
+                                render={
+                                  <Link
+                                    href="/faq"
+                                    className="hover:text-foreground"
+                                  >
+                                    FAQ & support
+                                  </Link>
+                                }
+                              />
+                            </li>
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
 
-                  <ul className="mt-6 flex flex-col gap-y-4 pl-6">
-                    {links.map((link) => (
-                      <li key={link.id}>
-                        <Link
-                          href={link.href}
-                          target={link.arrowUp ? "_blank" : "_self"}
-                          className="text-muted-foreground hover:text-foreground"
-                        >
-                          {link.title}
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
+                    <SheetFooter className="border-t border-border bg-background px-6 py-4">
+                      {data?.status ? (
+                        <div className="flex w-full flex-col gap-2">
+                          <SheetClose
+                            render={
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="w-full justify-between"
+                                render={
+                                  <Link
+                                    href="/account"
+                                    className="flex w-full items-center justify-between"
+                                  >
+                                    <span>My account</span>
+                                    <User className="size-4" />
+                                  </Link>
+                                }
+                              />
+                            }
+                          />
+                          <SheetClose
+                            render={
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="w-full justify-center text-muted-foreground hover:text-foreground"
+                              >
+                                Sign out
+                              </Button>
+                            }
+                          />
+                        </div>
+                      ) : (
+                        <div className="flex w-full flex-col gap-2">
+                          <SheetClose
+                            render={
+                              <Button
+                                size="sm"
+                                className="w-full"
+                                render={
+                                  <Link
+                                    href="/auth/login"
+                                    className="flex w-full items-center justify-center gap-2 text-white"
+                                  >
+                                    <User className="size-4" />
+                                    <span>Sign in</span>
+                                  </Link>
+                                }
+                              />
+                            }
+                          />
+                          <SheetClose
+                            render={
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="w-full"
+                                render={
+                                  <Link
+                                    href="/auth/register"
+                                    className="flex w-full items-center justify-center gap-2"
+                                  >
+                                    <span>Create account</span>
+                                  </Link>
+                                }
+                              />
+                            }
+                          />
+                        </div>
+                      )}
+                    </SheetFooter>
+                  </SheetContent>
+                </Sheet>
+              </div>
 
-                  <SheetFooter className="mt-6 text-white fixed bottom-0 left-0 w-full pb-6 px-6">
-                    <Button
-                      render={<Link href="/event-enquiry">Enquire Now</Link>}
-                    ></Button>
-                    <SheetClose
-                      render={<Button variant="outline">Close</Button>}
-                    ></SheetClose>
-                  </SheetFooter>
-                </SheetContent>
-              </Sheet>
-            </div>
-
-            <div className="flex  justify-center items-center gap-x-2">
               <Link href="/">
-                <div className="flex flex-col justify-center items-center gap-x-2">
-                  <h1 className="text-2xl text-primary font-serif font-bold">
-                    Ethnic Elegance
-                  </h1>
-                  <p className="text-xs/1 font-primary">
-                    Where tradition meets style
-                  </p>
+                <div className="flex items-center gap-3">
+                  <Image
+                    src="/logo.jpeg"
+                    alt="Ethnic Elegance Logo"
+                    width={40}
+                    height={40}
+                    className="hidden sm:block rounded-lg"
+                  />
+                  <div className="flex flex-col">
+                    <span className="text-2xl sm:text-2xl text-primary font-serif font-bold tracking-tight">
+                      Ethnic Elegance
+                    </span>
+                    <span className="text-xs sm:text-xs text-muted-foreground">
+                      Where tradition meets style
+                    </span>
+                  </div>
                 </div>
               </Link>
             </div>
 
-            {/* Desktop CTA */}
-            <div className="hidden sm:flex gap-x-3 text-white  sm:items-center sm:gap-x-4 ">
+            {/* Center: desktop navigation */}
+            <ul className="hidden md:flex items-center justify-center gap-6 text-sm">
+              {links.map((link) => (
+                <li key={link.id}>
+                  <Link
+                    href={link.href}
+                    target={link.arrowUp ? "_blank" : "_self"}
+                    className="flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    <span className="relative">
+                      {link.title}
+                      {link.arrowUp && (
+                        <ArrowUpRight className="size-2.5 absolute -right-3 top-0" />
+                      )}
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+
+            {/* Right: account, cart, primary CTA */}
+            <div className="flex items-center gap-2 sm:gap-3">
               {data?.status ? (
                 <UserDropdown user={data.data} />
               ) : (
-                <ShoppingBag />
+                <>
+                  <Link
+                    href="/auth/login"
+                    className="flex items-center gap-1 rounded-full border px-3 py-1.5 text-xs sm:text-sm text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
+                  >
+                    <User className="size-4" />
+                    <span className="hidden sm:inline">Sign in</span>
+                  </Link>
+                  <Link
+                    href="/cart"
+                    className="relative inline-flex h-9 w-9 items-center justify-center rounded-full border bg-background hover:bg-accent transition-colors"
+                    aria-label="View shopping bag"
+                  >
+                    <ShoppingBag className="size-4" />
+                  </Link>
+                </>
               )}
-              <Button render={<Link href="/products"></Link>}>Shop Now</Button>
-            </div>
 
-            {/* Mobile Menu */}
-            <div className="flex sm:hidden items-center gap-x-4">
-              <ShoppingBag />
+              <div className="hidden sm:block text-white">
+                <Button
+                  size="sm"
+                  render={<Link href="/products">Shop Now</Link>}
+                />
+              </div>
             </div>
           </div>
+
+       
         </nav>
       </header>
     </div>
