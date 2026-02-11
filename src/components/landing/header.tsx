@@ -19,7 +19,7 @@ import {
 
 import { Banner } from "@/components/ui/banner";
 import { InfiniteSlider } from "../ui/infinite-slider";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import UserDropdown from "./user-dropdown";
 
@@ -40,13 +40,16 @@ const links = [
 
 export function Header() {
   const [scrolled, setScrolled] = useState(false);
+  const queryClient = useQueryClient();
 
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["getUser"],
     queryFn: async () => {
-      const response = await api.get("/account/me");
+      const response = await api.get("/account/me", { queryClient });
       return response;
     },
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    refetchOnWindowFocus: true, // Refetch when window regains focus
   });
 
   useEffect(() => {
@@ -338,8 +341,6 @@ export function Header() {
               </div>
             </div>
           </div>
-
-       
         </nav>
       </header>
     </div>

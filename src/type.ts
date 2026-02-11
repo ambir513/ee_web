@@ -263,16 +263,22 @@ export const CREATECOUPONSANITIZE = z.object({
  * @returns {ZodObject} Zod schema object for address creation data validation.
  */
 export const CREATEADDRESSSANITIZE = z.object({
+  label: z
+    .string()
+    .min(1, { message: "Label is required" })
+    .max(30, { message: "Label must be less than 30 characters" }),
   addressLine1: z
     .string()
     .min(1, { message: "Address Line 1 is required" })
     .max(100, { message: "Address Line 1 must be less than 100 characters" }),
   addressLine2: z
     .string()
-    .max(100, { message: "Address Line 2 must be less than 100 characters" }),
+    .min(1, { message: "Area/Landmark is required" })
+    .max(100, { message: "Area/Landmark must be less than 100 characters" }),
   addressLine3: z
     .string()
-    .max(100, { message: "Address Line 3 must be less than 100 characters" }),
+    .min(1, { message: "Taluka/District is required" })
+    .max(100, { message: "Taluka/District must be less than 100 characters" }),
   city: z.string().min(1, { message: "City is required" }),
   state: z.string().min(1, { message: "State is required" }),
   country: z.string().min(1, { message: "Country is required" }).optional(),

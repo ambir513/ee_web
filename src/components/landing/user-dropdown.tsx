@@ -83,10 +83,12 @@ const UserDropdown = ({ user }: { user: any }) => {
             </div>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
+         <Link href={"/account"}>
           <DropdownMenuItem>
             <User />
             Profile
           </DropdownMenuItem>
+         </Link>
 
           {user?.role === "ADMIN" && (
             <Link href={"/admin"}>
@@ -96,10 +98,13 @@ const UserDropdown = ({ user }: { user: any }) => {
               </DropdownMenuItem>
             </Link>
           )}
+                <Link href={"/account#orders"}>
           <DropdownMenuItem>
             <ScrollText />
             Order
           </DropdownMenuItem>
+                </Link>
+                  <Link href={"/account#cart"}>
           <DropdownMenuItem>
             <div className="flex justify-between w-full">
               <p className="flex justify-center items-center gap-x-2">
@@ -109,6 +114,7 @@ const UserDropdown = ({ user }: { user: any }) => {
               <Badge className="text-white ">1</Badge>
             </div>
           </DropdownMenuItem>
+                  </Link>
           <DropdownMenuItem>
             <IoMdHeartEmpty />
             My Wishlist

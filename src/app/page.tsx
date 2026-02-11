@@ -21,7 +21,7 @@ export default function Home() {
       {/* <OfferBanner /> */}
       <Header />
       <Hero />
-      <main className="font-sans max-w-7xl 2xl:mx-auto mx-4 space-y-16 ">
+      <main className="font-sans max-w-7xl mx-auto px-4 space-y-16 ">
         {/* <CarouselHeroSection /> */}
         <BentoGrid />
         <BrowserCategorySection />

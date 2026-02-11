@@ -3,7 +3,8 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
-const queryClient = new QueryClient();
+// Export queryClient so it can be used to access cache in API calls
+export const queryClient = new QueryClient();
 
 export function TanstackQueryProvider({
   children,

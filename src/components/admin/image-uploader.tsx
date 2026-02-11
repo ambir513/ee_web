@@ -57,7 +57,7 @@ export function ImageUpload({
     signature: string;
   }> => {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/cloudinary/signature`,
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/cloudinary/signature?folder=products`,
       { credentials: "include" },
     );
 
@@ -100,7 +100,7 @@ export function ImageUpload({
 
     try {
       const response = await fetch(
-        `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "ddmr6pt5h"}/auto/upload`,
+        `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || "ddmr6pt5h"}/image/upload`,
         {
           method: "POST",
           body: formData,
