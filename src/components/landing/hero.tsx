@@ -12,36 +12,36 @@ const banners = [
     id: 1,
     image: "/images/kurta-1.png",
     label: "Spring / Summer 2026",
-    title: "Where tradition meets modern elegance",
+    title: "where tradition meets stlye",
     description:
-      "Discover exquisite handcrafted kurtas that celebrate the artistry of Indian textiles.",
+      "An elegant ivory ethnic outfit highlighted with vibrant floral and peacock embroidery, radiating refined handcrafted charm.",
     cta: "Shop New Arrivals",
   },
   {
     id: 2,
-    image: "/images/kurta-2.jpg",
+    image: "/images/kurta-2.jpeg",
     label: "Exclusive Collection",
-    title: "Silk kurtas crafted for grace",
+    title: "Bold colour, timeless grace",
     description:
-      "Premium silk kurtas with intricate embroidery for the modern woman.",
+      "A radiant mustard-yellow kurta highlighted with subtle embroidery, exuding bold elegance and effortless grace.",
     cta: "Explore Silk",
   },
   {
     id: 3,
     image: "/images/kurta-3.jpg",
     label: "Everyday Elegance",
-    title: "Cotton comfort, timeless style",
+    title: "Where subtle embroidery meets timeless elegance",
     description:
-      "Breathable cotton kurtas blending comfort with sophisticated design.",
+      "A graceful teal ethnic suit highlighted with delicate floral embroidery and a sheer dupatta, exuding timeless elegance.",
     cta: "Shop Cotton",
   },
   {
     id: 4,
     image: "/images/kurta-4.jpg",
     label: "Festive Edit",
-    title: "Celebrate in stunning kurtas",
+    title: "Soft hues, bold elegance ✨",
     description:
-      "Handpicked festive collection featuring rich fabrics and artisan work.",
+      "A soft sage-green ethnic ensemble highlighted with delicate embroidery and a vibrant pink dupatta, blending grace with contemporary charm.",
     cta: "View Festive",
   },
 ];
