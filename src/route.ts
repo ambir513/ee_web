@@ -6,7 +6,7 @@ export const isAdminRoutes = [
   "/admin/orders",
 ];
 
-export const isProtectedRoutes = ["/account"];
+export const isProtectedRoutes = ["/account", "/track"];
 
 export const REDIRECT_URL = "/login";
 export const ADMIN_REDIRECT_URL = "/admin";

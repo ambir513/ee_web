@@ -1,10 +1,25 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown, ChevronUp, Package, Filter } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
+import { api } from "@/lib/api";
+import {
+  ChevronDown,
+  ChevronUp,
+  Package,
+  Filter,
+  Loader2,
+  ExternalLink,
+  Truck,
+  CheckCircle2,
+  XCircle,
+  Clock,
+  Box,
+  MapPin,
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 import {
   Select,
   SelectContent,
@@ -21,124 +36,155 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-type OrderStatus =
-  | "Placed"
-  | "Confirmed"
+type OrderStatusType =
+  | "Order"
   | "Shipped"
-  | "Out for Delivery"
+  | "Out of Delivery"
   | "Delivered"
   | "Cancelled";
 
-type PaymentStatus = "Paid" | "Pending" | "Failed" | "Refunded";
-
-interface OrderItem {
-  name: string;
-  quantity: number;
-  price: number;
+interface StatusEntry {
+  _id: string;
+  status: OrderStatusType;
+  description: string;
+  createdAt: string;
 }
 
-interface Order {
-  id: string;
-  date: string;
-  totalAmount: number;
-  paymentStatus: PaymentStatus;
-  orderStatus: OrderStatus;
-  paymentMethod: string;
-  address: string;
-  items: OrderItem[];
+interface OrderData {
+  _id: string;
+  razorpayOrderId: string;
+  amount: number;
+  currency: string;
+  receipt: string;
+  status: string;
+  paymentId: string;
+  createdAt: string;
+  productId: {
+    _id: string;
+    name: string;
+    price: number;
+    mrp: number;
+    variants: any[];
+    sku: string;
+  };
+  notes: {
+    name: string;
+    email: string;
+    products: any[];
+    offer: string;
+    address: {
+      label: string;
+      addressLine1: string;
+      addressLine2: string;
+      city: string;
+      state: string;
+      pinCode: number;
+      phoneNo: number;
+    };
+  };
+  statusHistory: StatusEntry[];
 }
 
-const sampleOrders: Order[] = [
-  {
-    id: "ORD-2025-001",
-    date: "2025-01-15",
-    totalAmount: 4897,
-    paymentStatus: "Paid",
-    orderStatus: "Delivered",
-    paymentMethod: "UPI",
-    address: "123 Main Street, Apt 4B, Mumbai, Maharashtra, 400001",
-    items: [
-      { name: "Wireless Bluetooth Headphones", quantity: 1, price: 2499 },
-      { name: "Phone Case", quantity: 2, price: 599 },
-      { name: "USB-C Cable", quantity: 1, price: 199 },
-    ],
+const statusConfig: Record<
+  OrderStatusType,
+  { icon: any; color: string; label: string }
+> = {
+  Order: {
+    icon: Package,
+    color: "bg-blue-50 text-blue-700 border-blue-200",
+    label: "Order Placed",
   },
-  {
-    id: "ORD-2025-002",
-    date: "2025-01-28",
-    totalAmount: 1799,
-    paymentStatus: "Paid",
-    orderStatus: "Shipped",
-    paymentMethod: "Credit Card",
-    address: "123 Main Street, Apt 4B, Mumbai, Maharashtra, 400001",
-    items: [{ name: "Organic Cotton T-Shirt", quantity: 2, price: 899 }],
+  Shipped: {
+    icon: Box,
+    color: "bg-amber-50 text-amber-700 border-amber-200",
+    label: "Shipped",
   },
-  {
-    id: "ORD-2025-003",
-    date: "2025-02-05",
-    totalAmount: 3299,
-    paymentStatus: "Pending",
-    orderStatus: "Placed",
-    paymentMethod: "COD",
-    address: "123 Main Street, Apt 4B, Mumbai, Maharashtra, 400001",
-    items: [{ name: "Running Shoes", quantity: 1, price: 3299 }],
+  "Out of Delivery": {
+    icon: Truck,
+    color: "bg-orange-50 text-orange-700 border-orange-200",
+    label: "Out for Delivery",
   },
-  {
-    id: "ORD-2025-004",
-    date: "2024-12-20",
-    totalAmount: 999,
-    paymentStatus: "Refunded",
-    orderStatus: "Cancelled",
-    paymentMethod: "Debit Card",
-    address: "123 Main Street, Apt 4B, Mumbai, Maharashtra, 400001",
-    items: [{ name: "Desk Lamp", quantity: 1, price: 999 }],
+  Delivered: {
+    icon: CheckCircle2,
+    color: "bg-emerald-50 text-emerald-700 border-emerald-200",
+    label: "Delivered",
   },
-  {
-    id: "ORD-2025-005",
-    date: "2025-02-08",
-    totalAmount: 5498,
-    paymentStatus: "Paid",
-    orderStatus: "Out for Delivery",
-    paymentMethod: "UPI",
-    address: "123 Main Street, Apt 4B, Mumbai, Maharashtra, 400001",
-    items: [
-      { name: "Backpack", quantity: 1, price: 1999 },
-      { name: "Stainless Steel Water Bottle", quantity: 1, price: 599 },
-      { name: "Notebook Set", quantity: 2, price: 1450 },
-    ],
+  Cancelled: {
+    icon: XCircle,
+    color: "bg-red-50 text-red-700 border-red-200",
+    label: "Cancelled",
   },
-];
-
-const statusColors: Record<OrderStatus, string> = {
-  Placed: "bg-blue-50 text-blue-700 border-blue-200",
-  Confirmed: "bg-indigo-50 text-indigo-700 border-indigo-200",
-  Shipped: "bg-amber-50 text-amber-700 border-amber-200",
-  "Out for Delivery": "bg-orange-50 text-orange-700 border-orange-200",
-  Delivered: "bg-emerald-50 text-emerald-700 border-emerald-200",
-  Cancelled: "bg-red-50 text-red-700 border-red-200",
-};
-
-const paymentColors: Record<PaymentStatus, string> = {
-  Paid: "bg-emerald-50 text-emerald-700 border-emerald-200",
-  Pending: "bg-amber-50 text-amber-700 border-amber-200",
-  Failed: "bg-red-50 text-red-700 border-red-200",
-  Refunded: "bg-slate-50 text-slate-700 border-slate-200",
 };
 
 export function OrdersTab() {
+  const router = useRouter();
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>("all");
 
+  const {
+    data: ordersData,
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ["myOrders"],
+    queryFn: async () => {
+      const res = await api.get("/order/my-orders");
+      return res;
+    },
+    staleTime: 2 * 60 * 1000,
+  });
+
+  const orders: OrderData[] = ordersData?.status ? ordersData.data || [] : [];
+
+  const getLatestStatus = (order: OrderData): OrderStatusType => {
+    if (!order.statusHistory || order.statusHistory.length === 0) return "Order";
+    return order.statusHistory[order.statusHistory.length - 1].status;
+  };
+
   const filteredOrders =
     statusFilter === "all"
-      ? sampleOrders
-      : sampleOrders.filter((o) => o.orderStatus === statusFilter);
+      ? orders
+      : orders.filter((o) => getLatestStatus(o) === statusFilter);
 
   const toggleOrder = (id: string) => {
     setExpandedOrder((prev) => (prev === id ? null : id));
   };
 
-  if (sampleOrders.length === 0) {
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="rounded-xl border border-border bg-card p-6">
+        <div className="flex flex-col items-center justify-center py-16">
+          <Loader2 className="h-7 w-7 animate-spin text-primary" />
+          <p className="mt-3 text-sm text-muted-foreground">
+            Loading your orders...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (isError) {
+    return (
+      <div className="rounded-xl border border-border bg-card p-6">
+        <div className="flex flex-col items-center justify-center py-16 text-center">
+          <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-red-50">
+            <XCircle className="h-6 w-6 text-red-500" />
+          </div>
+          <h3 className="text-base font-medium text-foreground">
+            Failed to load orders
+          </h3>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Please try again later.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Empty state
+  if (orders.length === 0) {
     return (
       <div className="rounded-xl border border-border bg-card p-6">
         <div className="flex flex-col items-center justify-center py-16 text-center">
@@ -164,21 +210,23 @@ export function OrdersTab() {
             Order History
           </h2>
           <p className="text-sm text-muted-foreground">
-            {sampleOrders.length} total orders
+            {orders.length} total order{orders.length !== 1 ? "s" : ""}
           </p>
         </div>
         <div className="flex items-center gap-2">
           <Filter className="h-4 w-4 text-muted-foreground" />
-          <Select value={statusFilter} onValueChange={(val) => setStatusFilter(val ?? "all")}>
+          <Select
+            value={statusFilter}
+            onValueChange={(val) => setStatusFilter(val ?? "all")}
+          >
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Filter by status" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Orders</SelectItem>
-              <SelectItem value="Placed">Placed</SelectItem>
-              <SelectItem value="Confirmed">Confirmed</SelectItem>
+              <SelectItem value="Order">Order Placed</SelectItem>
               <SelectItem value="Shipped">Shipped</SelectItem>
-              <SelectItem value="Out for Delivery">Out for Delivery</SelectItem>
+              <SelectItem value="Out of Delivery">Out for Delivery</SelectItem>
               <SelectItem value="Delivered">Delivered</SelectItem>
               <SelectItem value="Cancelled">Cancelled</SelectItem>
             </SelectContent>
@@ -192,117 +240,161 @@ export function OrdersTab() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Order ID</TableHead>
+                <TableHead>Receipt</TableHead>
+                <TableHead>Product</TableHead>
                 <TableHead>Date</TableHead>
-                <TableHead>Total</TableHead>
-                <TableHead>Payment</TableHead>
+                <TableHead>Amount</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead className="w-10">
-                  <span className="sr-only">Details</span>
-                </TableHead>
+                <TableHead className="text-right">Action</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredOrders.map((order) => (
-                <>
-                  <TableRow
-                    key={order.id}
-                    className="cursor-pointer"
-                    onClick={() => toggleOrder(order.id)}
-                  >
-                    <TableCell className="font-medium text-foreground">
-                      {order.id}
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {new Date(order.date).toLocaleDateString("en-IN", {
-                        year: "numeric",
-                        month: "short",
-                        day: "numeric",
-                      })}
-                    </TableCell>
-                    <TableCell className="font-medium text-foreground">
-                      {"Rs."} {order.totalAmount.toLocaleString("en-IN")}
-                    </TableCell>
-                    <TableCell>
-                      <span
-                        className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium ${paymentColors[order.paymentStatus]}`}
-                      >
-                        {order.paymentStatus}
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      <span
-                        className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium ${statusColors[order.orderStatus]}`}
-                      >
-                        {order.orderStatus}
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      {expandedOrder === order.id ? (
-                        <ChevronUp className="h-4 w-4 text-muted-foreground" />
-                      ) : (
-                        <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                      )}
-                    </TableCell>
-                  </TableRow>
+              {filteredOrders.map((order) => {
+                const latestStatus = getLatestStatus(order);
+                const config = statusConfig[latestStatus];
+                const productName =
+                  order.notes?.products?.[0]?.name ||
+                  order.productId?.name ||
+                  "Product";
 
-                  {expandedOrder === order.id && (
-                    <TableRow key={`${order.id}-details`}>
-                      <TableCell colSpan={6} className="bg-muted/30 p-0">
-                        <OrderDetails order={order} />
+                return (
+                  <>
+                    <TableRow
+                      key={order._id}
+                      className="cursor-pointer"
+                      onClick={() => toggleOrder(order._id)}
+                    >
+                      <TableCell className="font-medium text-foreground font-mono text-xs">
+                        {order.receipt}
+                      </TableCell>
+                      <TableCell className="max-w-[200px]">
+                        <p className="text-sm text-foreground truncate">
+                          {productName}
+                        </p>
+                      </TableCell>
+                      <TableCell className="text-muted-foreground text-sm">
+                        {new Date(order.createdAt).toLocaleDateString("en-IN", {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                        })}
+                      </TableCell>
+                      <TableCell className="font-medium text-foreground">
+                        ₹{order.amount?.toLocaleString("en-IN")}
+                      </TableCell>
+                      <TableCell>
+                        <span
+                          className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium ${config.color}`}
+                        >
+                          {config.label}
+                        </span>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-7 text-xs gap-1"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              router.push(`/track?id=${order._id}`);
+                            }}
+                          >
+                            <MapPin className="h-3 w-3" />
+                            Track
+                          </Button>
+                          {expandedOrder === order._id ? (
+                            <ChevronUp className="h-4 w-4 text-muted-foreground" />
+                          ) : (
+                            <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                          )}
+                        </div>
                       </TableCell>
                     </TableRow>
-                  )}
-                </>
-              ))}
+
+                    {expandedOrder === order._id && (
+                      <TableRow key={`${order._id}-details`}>
+                        <TableCell colSpan={6} className="bg-muted/30 p-0">
+                          <OrderDetails order={order} />
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </>
+                );
+              })}
             </TableBody>
           </Table>
         </div>
 
         {/* Mobile cards */}
         <div className="flex flex-col gap-3 md:hidden">
-          {filteredOrders.map((order) => (
-            <div key={order.id} className="rounded-lg border border-border">
-              <button
-                type="button"
-                className="flex w-full items-center justify-between p-4 text-left"
-                onClick={() => toggleOrder(order.id)}
-              >
-                <div className="flex flex-col gap-1">
-                  <span className="text-sm font-semibold text-foreground">
-                    {order.id}
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    {new Date(order.date).toLocaleDateString("en-IN", {
-                      year: "numeric",
-                      month: "short",
-                      day: "numeric",
-                    })}
-                  </span>
-                  <span className="text-sm font-medium text-foreground">
-                    {"Rs."} {order.totalAmount.toLocaleString("en-IN")}
-                  </span>
-                </div>
-                <div className="flex flex-col items-end gap-2">
-                  <span
-                    className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium ${statusColors[order.orderStatus]}`}
-                  >
-                    {order.orderStatus}
-                  </span>
-                  {expandedOrder === order.id ? (
-                    <ChevronUp className="h-4 w-4 text-muted-foreground" />
-                  ) : (
-                    <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                  )}
-                </div>
-              </button>
-              {expandedOrder === order.id && (
-                <div className="border-t border-border">
-                  <OrderDetails order={order} />
-                </div>
-              )}
-            </div>
-          ))}
+          {filteredOrders.map((order) => {
+            const latestStatus = getLatestStatus(order);
+            const config = statusConfig[latestStatus];
+            const productName =
+              order.notes?.products?.[0]?.name ||
+              order.productId?.name ||
+              "Product";
+
+            return (
+              <div key={order._id} className="rounded-lg border border-border">
+                <button
+                  type="button"
+                  className="flex w-full items-center justify-between p-4 text-left"
+                  onClick={() => toggleOrder(order._id)}
+                >
+                  <div className="flex flex-col gap-1 flex-1 min-w-0 pr-3">
+                    <span className="text-xs text-muted-foreground font-mono">
+                      {order.receipt}
+                    </span>
+                    <span className="text-sm font-semibold text-foreground truncate">
+                      {productName}
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      {new Date(order.createdAt).toLocaleDateString("en-IN", {
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                      })}
+                      <span className="mx-1.5">·</span>₹
+                      {order.amount?.toLocaleString("en-IN")}
+                    </span>
+                  </div>
+                  <div className="flex flex-col items-end gap-2">
+                    <span
+                      className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium ${config.color}`}
+                    >
+                      {config.label}
+                    </span>
+                    {expandedOrder === order._id ? (
+                      <ChevronUp className="h-4 w-4 text-muted-foreground" />
+                    ) : (
+                      <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                    )}
+                  </div>
+                </button>
+                {expandedOrder === order._id && (
+                  <div className="border-t border-border">
+                    <OrderDetails order={order} />
+                    <div className="px-4 pb-4">
+                      <Button
+                        variant="default"
+                        size="sm"
+                        className="w-full gap-1.5"
+                        onClick={() =>
+                          router.push(`/track?id=${order._id}`)
+                        }
+                      >
+                        <MapPin className="h-3.5 w-3.5" />
+                        Track Order
+                        <ExternalLink className="h-3 w-3 ml-1" />
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
 
         {filteredOrders.length === 0 && (
@@ -325,46 +417,105 @@ export function OrdersTab() {
   );
 }
 
-function OrderDetails({ order }: { order: Order }) {
+function OrderDetails({ order }: { order: OrderData }) {
+  const address = order.notes?.address;
+  const products = order.notes?.products || [];
+  const latestStatus =
+    order.statusHistory?.[order.statusHistory.length - 1];
+
   return (
     <div className="p-5">
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-5 sm:grid-cols-3">
+        {/* Items */}
         <div>
-          <h4 className="mb-2 text-sm font-semibold text-foreground">
+          <h4 className="mb-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
             Items Ordered
           </h4>
           <div className="flex flex-col gap-2">
-            {order.items.map((item, i) => (
-              <div
-                key={`${order.id}-item-${i}`}
-                className="flex items-center justify-between text-sm"
-              >
-                <span className="text-muted-foreground">
-                  {item.name} x{item.quantity}
-                </span>
-                <span className="font-medium text-foreground">
-                  {"Rs."} {(item.price * item.quantity).toLocaleString("en-IN")}
-                </span>
-              </div>
-            ))}
+            {products.length > 0
+              ? products.map((item: any, i: number) => (
+                <div
+                  key={`${order._id}-item-${i}`}
+                  className="flex items-center justify-between text-sm"
+                >
+                  <span className="text-muted-foreground truncate pr-2">
+                    {item.name}
+                    {item.quantity > 1 && ` x${item.quantity}`}
+                  </span>
+                  <span className="font-medium text-foreground whitespace-nowrap">
+                    ₹{item.price?.toLocaleString("en-IN")}
+                  </span>
+                </div>
+              ))
+              : (
+                <p className="text-sm text-muted-foreground">
+                  {order.productId?.name || "Product"}
+                </p>
+              )}
           </div>
         </div>
 
-        <div className="flex flex-col gap-3">
-          <div>
-            <h4 className="mb-1 text-sm font-semibold text-foreground">
-              Payment Method
-            </h4>
+        {/* Address */}
+        <div>
+          <h4 className="mb-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+            Delivery Address
+          </h4>
+          {address ? (
+            <div className="text-sm text-muted-foreground">
+              <p>{address.addressLine1}</p>
+              {address.addressLine2 && <p>{address.addressLine2}</p>}
+              <p>
+                {address.city}, {address.state} - {address.pinCode}
+              </p>
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">N/A</p>
+          )}
+        </div>
+
+        {/* Latest Status */}
+        <div>
+          <h4 className="mb-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+            Latest Update
+          </h4>
+          {latestStatus ? (
+            <div className="flex items-start gap-2">
+              <div
+                className={`mt-0.5 h-2 w-2 rounded-full shrink-0 ${statusConfig[latestStatus.status]
+                    ? "bg-current"
+                    : "bg-muted-foreground"
+                  }`}
+                style={{
+                  color:
+                    latestStatus.status === "Delivered"
+                      ? "#059669"
+                      : latestStatus.status === "Cancelled"
+                        ? "#dc2626"
+                        : "#d97706",
+                }}
+              />
+              <div>
+                <p className="text-sm font-medium text-foreground">
+                  {statusConfig[latestStatus.status]?.label || latestStatus.status}
+                </p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {latestStatus.description}
+                </p>
+                <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
+                  <Clock className="h-3 w-3" />
+                  {new Date(latestStatus.createdAt).toLocaleDateString("en-IN", {
+                    day: "numeric",
+                    month: "short",
+                    year: "numeric",
+                  })}
+                </p>
+              </div>
+            </div>
+          ) : (
             <p className="text-sm text-muted-foreground">
-              {order.paymentMethod}
+              No status updates yet
             </p>
-          </div>
-          <div>
-            <h4 className="mb-1 text-sm font-semibold text-foreground">
-              Delivery Address
-            </h4>
-            <p className="text-sm text-muted-foreground">{order.address}</p>
-          </div>
+          )}
         </div>
       </div>
     </div>

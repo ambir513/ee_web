@@ -11,7 +11,6 @@ const collections = [
     title: "New Arrivals",
     subtitle: "Spring Collection",
     description: "Discover our latest handcrafted kurtas with intricate embroidery",
-    image: "/images/kurta-1.jpg",
     href: "#",
     size: "large",
   },
@@ -30,7 +29,7 @@ const collections = [
     subtitle: "Celebration Ready",
     description: "Silk & chanderi collection",
     image: "/images/kurta-3.jpg",
-    href: "#",
+    href: "/products",
     size: "medium",
   },
   {
@@ -39,7 +38,7 @@ const collections = [
     subtitle: "Comfort Meets Style",
     description: "Cotton kurtas for daily elegance",
     image: "/images/kurta-4.jpg",
-    href: "#",
+    href: "/products",
     size: "small",
   },
   {
@@ -48,7 +47,7 @@ const collections = [
     subtitle: "Handmade Heritage",
     description: "Each piece tells a story",
     image: "/images/kurta-5.jpg",
-    href: "#",
+    href: "/products",
     size: "featured",
   },
 ]
@@ -72,7 +71,7 @@ export function BentoGrid() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 auto-rows-[280px] lg:auto-rows-[320px]">
         {/* Large featured item - spans 2 columns and 2 rows */}
         <BentoCard
-          collection={collections[0]}
+          collection={collections[3]}
           className="md:col-span-2 md:row-span-2"
         />
 
@@ -85,7 +84,6 @@ export function BentoGrid() {
           collection={collections[4]}
           className="md:col-span-2 lg:col-span-2"
         />
-        <BentoCard collection={collections[3]} className="md:col-span-2 lg:col-span-2" />
       </div>
     </section>
   )

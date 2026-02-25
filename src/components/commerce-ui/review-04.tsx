@@ -58,7 +58,7 @@ export default function Review_04({
   const [editingReviewId, setEditingReviewId] = React.useState<string | null>(null);
   const [reviewToDelete, setReviewToDelete] = React.useState<string | null>(null);
   const [deleteConfirmText, setDeleteConfirmText] = React.useState("");
-  
+
   const queryClient = useQueryClient();
 
   // Get current user
@@ -179,49 +179,48 @@ export default function Review_04({
   };
 
   return (
-    <div className="mx-auto max-w-5xl space-y-12 py-8">
+    <div className="mx-auto max-w-5xl space-y-10 sm:space-y-16 py-4 sm:py-8">
       {/* Summary Section */}
-      <div className="grid gap-10 md:grid-cols-[1fr_2fr]">
-        <div className="flex flex-col items-center justify-center rounded-3xl bg-secondary/30 p-8 text-center backdrop-blur-sm border border-border/50">
-          <span className="text-7xl font-serif font-bold text-foreground">
+      <div className="grid gap-6 sm:gap-12 md:grid-cols-[1fr_2fr] items-center">
+        <div className="flex flex-col items-center justify-center border border-border/60 p-6 sm:p-10 text-center">
+          <span className="text-4xl sm:text-6xl font-serif text-foreground tracking-tight">
             {averageRating.toFixed(1)}
           </span>
-          <div className="mt-4">
-            <StarRating value={averageRating} readOnly iconSize={24} color="#D4AF37" />
+          <div className="mt-3 sm:mt-4 flex gap-0.5 text-foreground">
+            <StarRating value={averageRating} readOnly iconSize={18} color="#000" />
           </div>
-          <p className="mt-2 text-sm font-medium text-muted-foreground uppercase tracking-widest">
-            {ratingCount} Global Reviews
+          <p className="mt-3 sm:mt-4 text-[9px] sm:text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">
+            Based on {ratingCount} Reviews
           </p>
-          
-          <Button 
-            variant="outline" 
-            className="mt-8 rounded-full border-primary/20 hover:bg-primary hover:text-primary-foreground transition-all duration-300"
+
+          <Button
+            variant="outline"
+            className="mt-6 sm:mt-8 rounded-none border-foreground text-foreground hover:bg-foreground hover:text-background transition-colors uppercase tracking-widest text-[10px] sm:text-[11px] h-10 sm:h-12 px-6 sm:px-8"
             onClick={() => setIsFormOpen(!isFormOpen)}
           >
-            {isFormOpen ? "Close Review Form" : "Write a Review"}
+            {isFormOpen ? "Close Form" : "Write a Review"}
           </Button>
         </div>
 
-        <div className="flex flex-col justify-center space-y-4 px-4">
-          <h3 className="text-lg font-serif font-semibold">Rating Distribution</h3>
-          <div className="space-y-3">
+        <div className="flex flex-col justify-center space-y-3 sm:space-y-5 px-0 md:px-8">
+          <div className="space-y-2.5 sm:space-y-4">
             {distribution.map((count, i) => {
               const star = 5 - i;
               const percentage = ratingCount > 0 ? (count / ratingCount) * 100 : 0;
               return (
-                <div key={star} className="flex items-center gap-4">
-                  <span className="w-12 text-sm font-medium text-muted-foreground whitespace-nowrap">
+                <div key={star} className="flex items-center gap-2.5 sm:gap-4 text-xs">
+                  <span className="w-12 sm:w-16 shrink-0 font-medium text-foreground uppercase tracking-widest text-[9px] sm:text-[10px]">
                     {star} Stars
                   </span>
-                  <div className="relative h-2 w-full overflow-hidden rounded-full bg-border/40">
+                  <div className="relative h-[2px] flex-1 min-w-0 overflow-hidden bg-muted/30">
                     <motion.div
                       initial={{ width: 0 }}
                       animate={{ width: `${percentage}%` }}
                       transition={{ duration: 1, ease: "easeOut" }}
-                      className="absolute inset-y-0 left-0 bg-[#D4AF37]"
+                      className="absolute inset-y-0 left-0 bg-foreground"
                     />
                   </div>
-                  <span className="w-8 text-right text-xs font-medium text-muted-foreground">
+                  <span className="w-6 sm:w-8 shrink-0 text-right font-medium text-muted-foreground text-[9px] sm:text-[10px]">
                     {count}
                   </span>
                 </div>
@@ -235,220 +234,208 @@ export default function Review_04({
       <AnimatePresence>
         {isFormOpen && (
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="rounded-3xl border border-primary/10 bg-white p-8 shadow-xl shadow-primary/5"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="overflow-hidden"
           >
-            {!currentUser ? (
-              <div className="flex flex-col items-center justify-center py-6 text-center">
-                <AlertCircle className="mb-3 h-10 w-10 text-amber-500" />
-                <p className="font-serif text-lg">Please sign in to share your experience</p>
-                <Button variant="link" className="mt-2 text-primary">Login to your account</Button>
-              </div>
-            ) : (
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                <div>
-                  <h3 className="mb-4 font-serif text-xl font-semibold">Share Your Thoughts</h3>
-                  <label className="text-sm font-medium text-muted-foreground">How would you rate this product?</label>
-                  <div className="mt-2">
-                    <StarRating 
-                      value={ratingValue} 
-                      onChange={(v) => setValue("rating", v)} 
-                      iconSize={32}
-                      color="#D4AF37"
-                    />
+            <div className="border border-border/60 bg-background p-8 sm:p-12 mb-12">
+              {!currentUser ? (
+                <div className="flex flex-col items-center justify-center py-12 text-center">
+                  <p className="font-serif text-2xl text-foreground tracking-tight">Sign in required</p>
+                  <p className="mt-2 text-sm text-muted-foreground">You must be signed in to leave a review.</p>
+                  <Button variant="outline" className="mt-6 rounded-none border-foreground uppercase tracking-widest text-[11px] h-12 px-8">Login</Button>
+                </div>
+              ) : (
+                <form onSubmit={handleSubmit(onSubmit)} className="space-y-8 max-w-2xl mx-auto">
+                  <div className="text-center">
+                    <h3 className="font-serif text-2xl text-foreground tracking-tight mb-2">Share Your Experience</h3>
+                    <p className="text-xs text-muted-foreground uppercase tracking-widest">Rate this product</p>
+                    <div className="mt-6 flex justify-center text-foreground">
+                      <StarRating
+                        value={ratingValue}
+                        onChange={(v) => setValue("rating", v)}
+                        iconSize={28}
+                        color="#000"
+                      />
+                    </div>
                   </div>
-                </div>
 
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-muted-foreground">Detailed Review</label>
-                  <textarea
-                    {...register("comment", { required: "Please tell us what you think" })}
-                    rows={4}
-                    className="w-full rounded-2xl border border-border bg-secondary/10 p-4 font-sans text-sm outline-none ring-primary/20 transition-all focus:border-primary/40 focus:ring-4"
-                    placeholder="Tell others about the quality, design, and fit..."
-                  />
-                  {errors.comment && (
-                    <p className="text-xs text-destructive">{errors.comment.message}</p>
+                  <div className="space-y-3">
+                    <label className="text-[11px] font-semibold text-foreground uppercase tracking-widest">Your Review</label>
+                    <textarea
+                      {...register("comment", { required: "Please enter your review." })}
+                      rows={5}
+                      className="w-full rounded-none border border-border/60 bg-transparent p-4 text-sm outline-none transition-colors focus:border-foreground focus:ring-1 focus:ring-foreground placeholder:text-muted-foreground/40"
+                      placeholder="Share your thoughts on the fit, fabric, and design..."
+                    />
+                    {errors.comment && (
+                      <p className="text-[11px] text-destructive uppercase tracking-widest">{errors.comment.message}</p>
+                    )}
+                  </div>
+
+                  <div className="flex justify-center pt-4">
+                    <Button
+                      type="submit"
+                      disabled={mutation.isPending}
+                      className="rounded-none bg-foreground px-12 h-12 text-background hover:bg-foreground/90 uppercase tracking-widest text-[11px]"
+                    >
+                      {mutation.isPending ? "Submitting..." : "Submit Review"}
+                    </Button>
+                  </div>
+
+                  {mutation.isSuccess && (
+                    <motion.p
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="mt-6 text-center text-[11px] font-semibold uppercase tracking-widest text-emerald-600 flex items-center justify-center gap-2"
+                    >
+                      <CheckCircle2 size={14} /> Review submitted successfully
+                    </motion.p>
                   )}
-                </div>
-
-                <div className="flex justify-end">
-                  <Button 
-                    type="submit" 
-                    disabled={mutation.isPending}
-                    className="rounded-full bg-primary px-8 py-6 text-primary-foreground hover:bg-primary/90"
-                  >
-                    {mutation.isPending ? "Sharing..." : "Post Review"}
-                    <Send className="ml-2 h-4 w-4" />
-                  </Button>
-                </div>
-                
-                {mutation.isSuccess && (
-                  <motion.p 
-                    initial={{ opacity: 0 }} 
-                    animate={{ opacity: 1 }} 
-                    className="mt-4 text-center text-sm font-medium text-emerald-600 flex items-center justify-center gap-2"
-                  >
-                    <CheckCircle2 size={16} /> Thank you for your review!
-                  </motion.p>
-                )}
-              </form>
-            )}
+                </form>
+              )}
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      <Separator className="opacity-50" />
-
       {/* Reviews List */}
-      <div className="space-y-8">
-        <h3 className="font-serif text-2xl font-semibold">Authentic Experiences ({reviews.length})</h3>
-        
+      <div className="space-y-12">
+        <h3 className="font-serif text-2xl text-foreground border-b border-border/60 pb-4">
+          Reviews ({reviews.length})
+        </h3>
+
         {reviews.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 text-center text-muted-foreground">
-            <MessageSquare size={48} strokeWidth={1} className="mb-4 opacity-20" />
-            <p className="font-serif text-xl">No reviews yet</p>
-            <p className="text-sm">Be the first to share your experience with this boutique piece.</p>
+          <div className="py-16 text-center">
+            <p className="font-serif text-xl text-foreground/50">No reviews yet.</p>
           </div>
         ) : (
-          <div className="grid gap-6">
+          <div className="grid gap-12">
             {reviews.map((review, idx) => (
               <motion.div
                 key={review._id}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: idx * 0.1 }}
-                className="group relative rounded-3xl border border-border/40 p-6 transition-all hover:bg-white hover:shadow-lg hover:shadow-primary/5"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: idx * 0.05 }}
+                className="group relative pb-12 border-b border-border/30 last:border-0"
               >
                 {editingReviewId === review._id ? (
                   /* Inline Edit Form */
-                  <form onSubmit={handleSubmitEdit(onEditSubmit)} className="space-y-4">
+                  <form onSubmit={handleSubmitEdit(onEditSubmit)} className="space-y-6">
                     <div className="flex items-center justify-between">
-                      <h4 className="font-serif font-semibold">Edit Your Review</h4>
-                      <Button 
-                        type="button" 
-                        variant="ghost" 
-                        size="icon" 
+                      <h4 className="font-serif text-xl">Edit Review</h4>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="rounded-none hover:bg-transparent hover:text-foreground/60"
                         onClick={() => setEditingReviewId(null)}
                       >
-                        <X size={18} />
+                        <X size={20} strokeWidth={1} />
                       </Button>
                     </div>
-                    <div>
-                      <StarRating 
-                        value={editRatingValue} 
-                        onChange={(v) => setValueEdit("rating", v)} 
-                        iconSize={24}
-                        color="#D4AF37"
+                    <div className="text-foreground">
+                      <StarRating
+                        value={editRatingValue}
+                        onChange={(v) => setValueEdit("rating", v)}
+                        iconSize={20}
+                        color="#000"
                       />
                     </div>
                     <textarea
                       {...registerEdit("comment", { required: "Comment cannot be empty" })}
-                      rows={3}
-                      className="w-full rounded-xl border border-border bg-secondary/5 p-3 text-sm outline-none focus:border-primary/40 focus:ring-2 focus:ring-primary/10"
+                      rows={4}
+                      className="w-full rounded-none border border-border/60 bg-transparent p-4 text-sm outline-none focus:border-foreground focus:ring-1 focus:ring-foreground"
                     />
-                    <div className="flex justify-end gap-2">
-                       <Button 
-                        type="button" 
-                        variant="outline" 
-                        size="sm" 
-                        className="rounded-full"
-                        onClick={() => setEditingReviewId(null)}
-                       >
-                         Cancel
-                       </Button>
-                       <Button 
-                        type="submit" 
-                        size="sm" 
+                    <div className="flex justify-start gap-4">
+                      <Button
+                        type="submit"
                         disabled={editMutation.isPending}
-                        className="rounded-full bg-primary text-primary-foreground"
-                       >
-                         {editMutation.isPending ? "Updating..." : "Update Review"}
-                       </Button>
+                        className="rounded-none bg-foreground text-background uppercase tracking-widest text-[10px] h-10 px-8"
+                      >
+                        {editMutation.isPending ? "Updating..." : "Update"}
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="rounded-none uppercase tracking-widest text-[10px] h-10 px-8 border-border hover:bg-transparent hover:border-foreground"
+                        onClick={() => setEditingReviewId(null)}
+                      >
+                        Cancel
+                      </Button>
                     </div>
                   </form>
                 ) : (
                   /* Review Content */
-                  <>
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-center gap-4">
-                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
-                          {typeof review.userId !== "string" ? (
-                            <span className="text-lg font-bold">
-                              {review.userId.name.charAt(0).toUpperCase()}
-                            </span>
-                          ) : (
-                            <User size={20} />
-                          )}
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <h4 className="font-serif font-semibold text-foreground">
-                              {typeof review.userId !== "string" ? review.userId.name : "Verified Customer"}
-                            </h4>
-                            {typeof review.userId !== "string" && currentUser?._id === review.userId._id && (
-                              <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold text-primary uppercase">You</span>
-                            )}
-                          </div>
-                          <p className="text-xs text-muted-foreground">{formatDate(review.createdAt)}</p>
-                        </div>
+                  <div className="grid md:grid-cols-[200px_1fr] gap-8">
+                    {/* User Info Col */}
+                    <div className="space-y-3">
+                      <div>
+                        <h4 className="text-[11px] font-semibold text-foreground uppercase tracking-wider">
+                          {typeof review.userId !== "string" ? review.userId.name : "Verified Customer"}
+                        </h4>
+                        {typeof review.userId !== "string" && currentUser?._id === review.userId._id && (
+                          <span className="inline-block mt-1 text-[9px] uppercase tracking-widest text-muted-foreground border border-border/60 px-2 py-0.5">Yours</span>
+                        )}
                       </div>
-                      <div className="flex flex-col items-end">
-                        <div className="flex items-center gap-1">
+                      <p className="text-[10px] text-muted-foreground uppercase tracking-widest">
+                        {formatDate(review.createdAt)}
+                      </p>
+
+                      <div className="pt-2 flex flex-col items-start gap-1">
+                        <div className="flex items-center gap-0.5 text-foreground">
                           {[...Array(5)].map((_, i) => (
                             <Star
                               key={i}
                               size={12}
                               className={cn(
-                                "fill-muted-foreground/20 text-muted-foreground/20",
-                                i < Math.round(review.rating) && "fill-[#D4AF37] text-[#D4AF37]"
+                                "fill-transparent text-muted-foreground/30",
+                                i < Math.round(review.rating) && "fill-foreground text-foreground"
                               )}
                             />
                           ))}
                         </div>
-                        <span className="mt-1 text-[10px] font-bold uppercase tracking-widest text-[#D4AF37]">
-                          Verified Purchase
+                        <span className="text-[9px] font-bold uppercase tracking-widest text-foreground">
+                          Verified
                         </span>
                       </div>
                     </div>
 
-                    <div className="mt-4 pl-16">
-                      <p className="text-sm leading-relaxed text-muted-foreground italic">
-                        "{review.comment}"
+                    {/* Review Text Col */}
+                    <div className="flex flex-col">
+                      <p className="text-sm leading-relaxed text-foreground font-light mb-8">
+                        {review.comment}
                       </p>
-                      
-                      <div className="mt-4 flex items-center justify-between border-t border-border/30 pt-4">
-                        <div className="flex items-center gap-4">
-                          <button className="flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-muted-foreground hover:text-primary transition-colors">
-                            <ThumbsUp size={12} /> Helpful
-                          </button>
-                          <button className="flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-muted-foreground hover:text-primary transition-colors">
-                            Report
+
+                      <div className="mt-auto flex items-center justify-between">
+                        {/* Empty left side or helpful buttons if needed */}
+                        <div className="flex gap-4">
+                          <button className="text-[10px] uppercase tracking-widest font-semibold text-muted-foreground hover:text-foreground transition-colors">
+                            Helpful
                           </button>
                         </div>
 
                         {/* Edit/Delete Actions */}
                         {typeof review.userId !== "string" && currentUser?._id === review.userId._id && (
-                          <div className="flex items-center gap-3">
-                            <button 
+                          <div className="flex items-center gap-4">
+                            <button
                               onClick={() => handleEditClick(review)}
-                              className="flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-muted-foreground hover:text-blue-600 transition-colors"
+                              className="text-[10px] uppercase tracking-widest font-semibold text-muted-foreground hover:text-foreground transition-colors"
                             >
-                              <Pencil size={12} /> Edit
+                              Edit
                             </button>
-                            <button 
+                            <button
                               onClick={() => setReviewToDelete(review._id)}
-                              className="flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-muted-foreground hover:text-rose-600 transition-colors"
+                              className="text-[10px] uppercase tracking-widest font-semibold text-muted-foreground hover:text-destructive transition-colors"
                             >
-                              <Trash2 size={12} /> Delete
+                              Delete
                             </button>
                           </div>
                         )}
                       </div>
                     </div>
-                  </>
+                  </div>
                 )}
               </motion.div>
             ))}
@@ -456,75 +443,46 @@ export default function Review_04({
         )}
       </div>
 
-     
-      <Dialog open={!!reviewToDelete} onOpenChange={(open) => !open && setReviewToDelete(null)}>
-        <DialogContent >
-          {/* Custom Close Button */}
-          <div className="absolute top-6 right-6 z-10">
-            <button
-              onClick={() => setReviewToDelete(null)}
-              className="flex h-8 w-8 items-center justify-center rounded-full bg-secondary/50 text-muted-foreground transition-all hover:bg-secondary hover:text-foreground"
-            >
-              <X size={16} />
-            </button>
-          </div>
 
-          <DialogHeader className="px-10 pt-16 pb-6 text-center">
-            <motion.div 
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              className="mx-auto flex h-24 w-24 items-center justify-center rounded-[2rem] bg-rose-50 text-rose-500 mb-8 border border-rose-100/50"
-            >
-              <Trash2 size={40} strokeWidth={1.5} className="animate-pulse" />
-            </motion.div>
-            <DialogTitle className="font-serif text-3xl font-bold text-foreground tracking-tight">
-              Delete Review?
-            </DialogTitle>
-            <DialogDescription className="text-muted-foreground text-[15px] pt-4 leading-relaxed font-sans">
-              This action is permanent and cannot be reversed. To confirm your intention, please type <span className="font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-lg border border-rose-100/50">delete</span> in the field below.
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="px-10 pb-12">
-            <div className="relative group">
+      <Dialog open={!!reviewToDelete} onOpenChange={(open) => !open && setReviewToDelete(null)}>
+        <DialogContent className="rounded-none border border-border/60 p-0 sm:max-w-[425px]">
+          <div className="p-8">
+            <DialogHeader className="mb-6">
+              <DialogTitle className="font-serif text-2xl text-foreground">
+                Delete Review
+              </DialogTitle>
+              <DialogDescription className="text-xs text-muted-foreground font-light pt-2 uppercase tracking-wide">
+                This action cannot be undone. Type 'delete' below to confirm.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="mb-8">
               <Input
                 value={deleteConfirmText}
                 onChange={(e) => setDeleteConfirmText(e.target.value)}
-                placeholder="Type 'delete' to verify"
-                className="h-16 text-center text-lg rounded-2xl border-muted/30 bg-secondary/10 font-sans tracking-wide placeholder:text-muted-foreground/30 focus-visible:ring-rose-500/10 focus-visible:border-rose-200 transition-all duration-300"
+                placeholder="Type 'delete'"
+                className="rounded-none border-border/60 focus-visible:ring-foreground focus-visible:border-foreground"
               />
-              <motion.div 
-                initial={false}
-                animate={{ opacity: deleteConfirmText.toLowerCase() === "delete" ? 1 : 0 }}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-rose-500"
-              >
-                <CheckCircle2 size={20} />
-              </motion.div>
             </div>
-          </div>
 
-          <DialogFooter className="flex-row  items-center  gap-3 ">
-            <Button
-              variant="ghost"
-              onClick={() => setReviewToDelete(null)}
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={handleDeleteSubmit}
-              disabled={deleteConfirmText.toLowerCase() !== "delete" || deleteMutation.isPending}
-              
-            >
-              {deleteMutation.isPending ? (
-                <span className="flex items-center gap-2">
-                  Processing...
-                </span>
-              ) : (
-                "Delete Review"
-              )}
-            </Button>
-          </DialogFooter>
+            <DialogFooter className="flex gap-3 sm:justify-start">
+              <Button
+                variant="destructive"
+                onClick={handleDeleteSubmit}
+                disabled={deleteConfirmText.toLowerCase() !== "delete" || deleteMutation.isPending}
+                className="rounded-none uppercase tracking-widest text-[10px] h-10 px-8"
+              >
+                {deleteMutation.isPending ? "Deleting..." : "Confirm"}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setReviewToDelete(null)}
+                className="rounded-none uppercase tracking-widest text-[10px] h-10 px-8 border-border hover:bg-transparent hover:text-foreground hover:border-foreground"
+              >
+                Cancel
+              </Button>
+            </DialogFooter>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

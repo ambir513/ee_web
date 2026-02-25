@@ -7,7 +7,6 @@ import {
   ShieldUser,
   User,
 } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { BsCart } from "react-icons/bs";
 import {
@@ -21,6 +20,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
 import { IoMdHeartEmpty } from "react-icons/io";
@@ -32,6 +32,20 @@ import { toastManager } from "../ui/toast";
 const UserDropdown = ({ user }: { user: any }) => {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const queryClient = useQueryClient();
+
+  // Sync with cart data
+  const { data: cartData } = useQuery({
+    queryKey: ["getCart"],
+    queryFn: () => api.get("/addtocart/all", { queryClient }),
+    staleTime: 5 * 60 * 1000,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    retry: false,
+  });
+
+  const cartItems = cartData?.data || [];
+  const cartCount = cartItems.reduce((sum: number, item: any) => sum + (item.quantity || 1), 0);
 
   const handleLogout = async () => {
     setIsLoading(true);
@@ -57,18 +71,8 @@ const UserDropdown = ({ user }: { user: any }) => {
     <DropdownMenu>
       <DropdownMenuTrigger
         render={
-          <Button className="relative h-10 w-10 rounded-full" variant="ghost">
-            <Avatar>
-              <AvatarImage
-                alt="User Profile"
-                src={
-                  user?.avatar ||
-                  "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y"
-                }
-              />
-              <AvatarFallback>SG</AvatarFallback>
-            </Avatar>
-            <span className="absolute right-0 bottom-0 h-3 w-3 rounded-full bg-primary ring-2 ring-background" />
+          <Button className="relative h-10 w-10 rounded-full" variant="outline">
+            <User className="size-5" />
           </Button>
         }
       ></DropdownMenuTrigger>
@@ -83,12 +87,12 @@ const UserDropdown = ({ user }: { user: any }) => {
             </div>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
-         <Link href={"/account"}>
-          <DropdownMenuItem>
-            <User />
-            Profile
-          </DropdownMenuItem>
-         </Link>
+          <Link href={"/account"}>
+            <DropdownMenuItem>
+              <User />
+              Profile
+            </DropdownMenuItem>
+          </Link>
 
           {user?.role === "ADMIN" && (
             <Link href={"/admin"}>
@@ -98,23 +102,25 @@ const UserDropdown = ({ user }: { user: any }) => {
               </DropdownMenuItem>
             </Link>
           )}
-                <Link href={"/account#orders"}>
-          <DropdownMenuItem>
-            <ScrollText />
-            Order
-          </DropdownMenuItem>
-                </Link>
-                  <Link href={"/account#cart"}>
-          <DropdownMenuItem>
-            <div className="flex justify-between w-full">
-              <p className="flex justify-center items-center gap-x-2">
-                <BsCart />
-                <span> My Cart </span>
-              </p>
-              <Badge className="text-white ">1</Badge>
-            </div>
-          </DropdownMenuItem>
-                  </Link>
+          <Link href={"/account#orders"}>
+            <DropdownMenuItem>
+              <ScrollText />
+              Order
+            </DropdownMenuItem>
+          </Link>
+          <Link href={"/account#cart"}>
+            <DropdownMenuItem>
+              <div className="flex justify-between w-full">
+                <p className="flex justify-center items-center gap-x-2">
+                  <BsCart />
+                  <span> My Cart </span>
+                </p>
+                {cartCount > 0 && (
+                  <Badge className="text-white">{cartCount}</Badge>
+                )}
+              </div>
+            </DropdownMenuItem>
+          </Link>
           <DropdownMenuItem>
             <IoMdHeartEmpty />
             My Wishlist

@@ -6,6 +6,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
+import Link from "next/link";
 
 const banners = [
   {
@@ -13,6 +14,7 @@ const banners = [
     image: "/images/kurta-1.png",
     label: "Spring / Summer 2026",
     title: "where tradition meets stlye",
+    herf: "/products",
     description:
       "An elegant ivory ethnic outfit highlighted with vibrant floral and peacock embroidery, radiating refined handcrafted charm.",
     cta: "Shop New Arrivals",
@@ -22,6 +24,7 @@ const banners = [
     image: "/images/kurta-2.jpeg",
     label: "Exclusive Collection",
     title: "Bold colour, timeless grace",
+    herf: "/products",
     description:
       "A radiant mustard-yellow kurta highlighted with subtle embroidery, exuding bold elegance and effortless grace.",
     cta: "Explore Silk",
@@ -29,6 +32,7 @@ const banners = [
   {
     id: 3,
     image: "/images/kurta-3.jpg",
+    herf: "/products",
     label: "Everyday Elegance",
     title: "Where subtle embroidery meets timeless elegance",
     description:
@@ -38,6 +42,7 @@ const banners = [
   {
     id: 4,
     image: "/images/kurta-4.jpg",
+    herf: "/products",
     label: "Festive Edit",
     title: "Soft hues, bold elegance ✨",
     description:
@@ -142,10 +147,14 @@ export function Hero() {
             >
               <Button
                 size="lg"
-                className="bg-primary-foreground text-foreground group h-11 px-6 text-sm font-medium"
+                variant={"outline"}
+                render={
+                  <Link href={banners[currentBanner].herf}>
+                    {banners[currentBanner].cta}
+                    <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                  </Link>
+                }
               >
-                {banners[currentBanner].cta}
-                <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
               </Button>
             </div>
           </div>
@@ -177,11 +186,10 @@ export function Hero() {
             type="button"
             key={b.id}
             onClick={() => goToBanner(index)}
-            className={`transition-all duration-300 ${
-              index === currentBanner
-                ? "w-8 sm:w-10 h-1.5 sm:h-2 bg-primary-foreground rounded-full"
-                : "w-1.5 sm:w-2 h-1.5 sm:h-2 bg-primary-foreground/40 rounded-full hover:bg-primary-foreground/60"
-            }`}
+            className={`transition-all duration-300 ${index === currentBanner
+              ? "w-8 sm:w-10 h-1.5 sm:h-2 bg-primary-foreground rounded-full"
+              : "w-1.5 sm:w-2 h-1.5 sm:h-2 bg-primary-foreground/40 rounded-full hover:bg-primary-foreground/60"
+              }`}
             aria-label={`Go to banner ${index + 1}`}
           />
         ))}

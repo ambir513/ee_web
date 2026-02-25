@@ -15,6 +15,7 @@ import {
   ChevronUp,
   Sparkles,
   Package,
+  Palette,
 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -36,8 +37,11 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
+  SheetFooter,
+  SheetDescription,
+  SheetClose,
+  SheetPanel,
 } from "@/components/ui/sheet";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Pagination,
   PaginationContent,
@@ -147,33 +151,38 @@ function StarRating({
 
 function FilterGroup({
   title,
+  icon,
   children,
   defaultOpen = true,
 }: {
   title: string;
+  icon?: React.ReactNode;
   children: React.ReactNode;
   defaultOpen?: boolean;
 }) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
 
   return (
-    <div className="border-b border-border/60 pb-4 last:border-b-0 last:pb-0">
+    <div className="border-b border-border/40 pb-4 last:border-b-0 last:pb-0">
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex w-full items-center justify-between py-1 text-sm font-medium text-foreground hover:text-primary transition-colors"
+        className="flex w-full items-center justify-between py-1.5 text-[13px] sm:text-sm font-semibold text-foreground hover:text-primary transition-colors active:scale-[0.98]"
       >
-        {title}
+        <span className="flex items-center gap-2">
+          {icon}
+          {title}
+        </span>
         {isOpen ? (
-          <ChevronUp className="h-4 w-4 text-muted-foreground" />
+          <ChevronUp className="h-4 w-4 text-muted-foreground transition-transform" />
         ) : (
-          <ChevronDown className="h-4 w-4 text-muted-foreground" />
+          <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform" />
         )}
       </button>
       <div
         className={cn(
-          "overflow-hidden transition-all duration-200",
-          isOpen ? "mt-3 max-h-[500px] opacity-100" : "max-h-0 opacity-0"
+          "overflow-hidden transition-all duration-250 ease-out",
+          isOpen ? "mt-3 max-h-[600px] opacity-100" : "max-h-0 opacity-0"
         )}
       >
         {children}
@@ -231,11 +240,12 @@ function FilterSection({
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <h3 className="text-sm font-semibold tracking-tight">Filters</h3>
+        <div className="flex items-center gap-2.5">
+          <span className="inline-block h-[2px] w-5 bg-primary/60 rounded-full" />
+          <h3 className="text-xs font-semibold tracking-[0.15em] uppercase text-foreground/80">Refine By</h3>
           {activeFilterCount > 0 && (
             <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-[10px] font-bold text-primary-foreground">
               {activeFilterCount}
@@ -245,14 +255,15 @@ function FilterSection({
         {activeFilterCount > 0 && (
           <button
             onClick={resetFilters}
-            className="text-xs text-muted-foreground hover:text-rose-500 transition-colors"
+            className="flex items-center gap-1 text-[11px] font-medium text-rose-500 hover:text-rose-600 transition-colors bg-rose-50 dark:bg-rose-950/20 rounded-full px-2.5 py-1 active:scale-95"
           >
+            <X className="h-3 w-3" />
             Clear all
           </button>
         )}
       </div>
 
-      <Separator className="!mt-3" />
+      <Separator className="!mt-2" />
 
       {/* Category */}
       <FilterGroup title="Category">
@@ -268,7 +279,7 @@ function FilterSection({
                 )
               }
               className={cn(
-                "rounded-full border px-3.5 py-1.5 text-xs font-medium transition-all duration-150",
+                "rounded-full border h-9 px-4 text-[13px] font-medium transition-all duration-150 active:scale-95",
                 filters.category === c.value
                   ? "border-primary bg-primary text-primary-foreground shadow-sm"
                   : "border-border bg-background text-muted-foreground hover:border-foreground/30 hover:text-foreground"
@@ -283,7 +294,7 @@ function FilterSection({
       {/* Sub Category */}
       <FilterGroup title="Sub Category" defaultOpen={false}>
         <Input
-          className="h-9 text-sm"
+          className="h-10 text-sm rounded-lg"
           placeholder="e.g. Kurta, Saree, Lehenga"
           value={filters.subCategory || ""}
           onChange={(e) => handleFilterChange("subCategory", e.target.value)}
@@ -291,8 +302,8 @@ function FilterSection({
       </FilterGroup>
 
       {/* Design */}
-      <FilterGroup title="Design / Pattern">
-        <div className="flex flex-wrap gap-1.5">
+      <FilterGroup title="Design / Pattern" icon={<Palette className="h-3.5 w-3.5 text-muted-foreground" />}>
+        <div className="flex flex-wrap gap-2">
           {DESIGNS.filter((d) => d.value).map((d) => (
             <button
               key={d.value}
@@ -304,10 +315,10 @@ function FilterSection({
                 )
               }
               className={cn(
-                "rounded-md border px-2.5 py-1 text-[11px] font-medium transition-all duration-150",
+                "rounded-lg border px-3 min-h-[34px] text-xs font-medium transition-all duration-150 active:scale-95",
                 filters.design === d.value
-                  ? "border-primary bg-primary/10 text-primary"
-                  : "border-border/50 text-muted-foreground hover:border-border hover:text-foreground"
+                  ? "border-primary bg-primary/10 text-primary shadow-sm"
+                  : "border-border/50 text-muted-foreground hover:border-border hover:text-foreground hover:bg-muted/50"
               )}
             >
               {d.label}
@@ -318,7 +329,7 @@ function FilterSection({
 
       {/* Rating */}
       <FilterGroup title="Customer Rating" defaultOpen={false}>
-        <div className="flex flex-col gap-1.5">
+        <div className="flex flex-col gap-1">
           {RATINGS.filter((r) => r.value).map((r) => (
             <button
               key={r.value}
@@ -330,14 +341,14 @@ function FilterSection({
                 )
               }
               className={cn(
-                "flex items-center gap-2 rounded-md px-2.5 py-2 text-xs transition-all",
+                "flex items-center gap-2.5 rounded-lg px-3 min-h-[40px] text-xs transition-all active:scale-[0.98]",
                 filters.rating === r.value
-                  ? "bg-amber-50 text-amber-700 dark:bg-amber-950/30 dark:text-amber-400"
-                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  ? "bg-amber-50 text-amber-700 dark:bg-amber-950/30 dark:text-amber-400 ring-1 ring-amber-200 dark:ring-amber-800"
+                  : "text-muted-foreground hover:bg-muted/80 hover:text-foreground"
               )}
             >
               <StarRating rating={parseInt(r.value)} size="sm" />
-              <span>{r.label}</span>
+              <span className="font-medium">{r.label}</span>
             </button>
           ))}
         </div>
@@ -346,15 +357,15 @@ function FilterSection({
       {/* Price Range */}
       <FilterGroup title="Price Range">
         <div className="space-y-3">
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-2 gap-3">
             <div>
-              <Label className="text-[10px] uppercase tracking-wide text-muted-foreground mb-1 block">
+              <Label className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1.5 block font-semibold">
                 Min (₹)
               </Label>
               <Input
                 type="number"
                 min={0}
-                className="h-9 text-sm"
+                className="h-10 text-sm rounded-lg"
                 placeholder="0"
                 value={filters.priceMin || ""}
                 onChange={(e) =>
@@ -363,13 +374,13 @@ function FilterSection({
               />
             </div>
             <div>
-              <Label className="text-[10px] uppercase tracking-wide text-muted-foreground mb-1 block">
+              <Label className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1.5 block font-semibold">
                 Max (₹)
               </Label>
               <Input
                 type="number"
                 min={0}
-                className="h-9 text-sm"
+                className="h-10 text-sm rounded-lg"
                 placeholder="Any"
                 value={filters.priceMax || ""}
                 onChange={(e) =>
@@ -379,7 +390,7 @@ function FilterSection({
             </div>
           </div>
           {/* Quick price presets */}
-          <div className="flex flex-wrap gap-1.5">
+          <div className="flex flex-wrap gap-2">
             {[
               { label: "Under ₹999", min: "", max: "999" },
               { label: "₹1K – ₹2K", min: "1000", max: "2000" },
@@ -398,11 +409,11 @@ function FilterSection({
                   }));
                 }}
                 className={cn(
-                  "rounded-md border px-2 py-1 text-[11px] font-medium transition-all",
+                  "rounded-lg border px-3 min-h-[34px] text-xs font-medium transition-all active:scale-95",
                   filters.priceMin === preset.min &&
                     filters.priceMax === preset.max
                     ? "border-primary bg-primary/10 text-primary"
-                    : "border-border/50 text-muted-foreground hover:border-border hover:text-foreground"
+                    : "border-border/50 text-muted-foreground hover:border-border hover:text-foreground hover:bg-muted/50"
                 )}
               >
                 {preset.label}
@@ -412,7 +423,7 @@ function FilterSection({
           <Button
             variant="secondary"
             size="sm"
-            className="w-full text-xs"
+            className="w-full h-10 text-xs rounded-lg"
             onClick={onApplyFilters}
           >
             Apply Price Filter
@@ -504,51 +515,51 @@ function ProductCard({
       <Card className="group overflow-hidden border-border/60 transition-all duration-300 hover:shadow-md hover:border-border">
         <Link href={`/products/${product._id}`}>
           <CardContent className="p-0">
-            <div className="flex gap-4">
-              <div className="relative h-40 w-36 shrink-0 overflow-hidden bg-muted sm:h-48 sm:w-44">
+            <div className="flex gap-3 sm:gap-4">
+              <div className="relative h-36 w-28 shrink-0 overflow-hidden bg-muted rounded-l-lg sm:h-48 sm:w-44">
                 {img ? (
                   <Image
                     src={img}
                     alt={product.name}
                     fill
                     className="object-cover transition-transform duration-500 group-hover:scale-105"
-                    sizes="180px"
+                    sizes="(max-width: 640px) 112px, 176px"
                   />
                 ) : (
                   <div className="flex h-full w-full items-center justify-center text-muted-foreground">
-                    <Package className="h-8 w-8" />
+                    <Package className="h-7 w-7 sm:h-8 sm:w-8" />
                   </div>
                 )}
                 {discount > 0 && (
-                  <Badge className="absolute left-2 top-2 bg-rose-500 text-[10px] px-1.5 py-0.5 font-semibold">
+                  <Badge className="absolute left-1.5 top-1.5 sm:left-2 sm:top-2 bg-rose-500 text-[9px] sm:text-[10px] px-1 sm:px-1.5 py-0.5 font-semibold">
                     {discount}% OFF
                   </Badge>
                 )}
               </div>
-              <div className="flex flex-1 flex-col justify-between py-3 pr-4">
-                <div className="space-y-1.5">
-                  <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+              <div className="flex flex-1 flex-col justify-between py-2.5 pr-3 sm:py-3 sm:pr-4">
+                <div className="space-y-1 sm:space-y-1.5">
+                  <p className="text-[10px] sm:text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
                     {product.category} · {product.subCategory}
                   </p>
-                  <h3 className="text-sm font-medium leading-snug line-clamp-2 group-hover:text-primary transition-colors">
+                  <h3 className="text-xs sm:text-sm font-medium leading-snug line-clamp-2 group-hover:text-primary transition-colors">
                     {product.name}
                   </h3>
                   {(product.averageRating > 0 || product.ratingCount > 0) && (
                     <div className="flex items-center gap-1.5">
                       <StarRating rating={product.averageRating || 0} size="sm" />
-                      <span className="text-xs text-muted-foreground">
+                      <span className="text-[10px] sm:text-xs text-muted-foreground">
                         ({product.ratingCount})
                       </span>
                     </div>
                   )}
                 </div>
-                <div className="flex items-end justify-between pt-2">
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-lg font-bold text-foreground">
+                <div className="flex flex-col gap-2 pt-1.5 sm:flex-row sm:items-end sm:justify-between sm:pt-2">
+                  <div className="flex items-baseline gap-1.5 sm:gap-2">
+                    <span className="text-base sm:text-lg font-bold text-foreground">
                       ₹{product.price.toLocaleString("en-IN")}
                     </span>
                     {product.mrp > product.price && (
-                      <span className="text-sm text-muted-foreground line-through">
+                      <span className="text-[11px] sm:text-sm text-muted-foreground line-through">
                         ₹{product.mrp.toLocaleString("en-IN")}
                       </span>
                     )}
@@ -556,19 +567,19 @@ function ProductCard({
                   <div className="flex gap-2">
                     <Button
                       size="sm"
-                      className="h-8 text-xs"
+                      className="h-7 sm:h-8 text-[11px] sm:text-xs px-2.5 sm:px-3"
                       onClick={(e) => e.preventDefault()}
                     >
-                      <ShoppingCart className="mr-1.5 h-3.5 w-3.5" />
+                      <ShoppingCart className="mr-1 h-3 w-3 sm:mr-1.5 sm:h-3.5 sm:w-3.5" />
                       Add
                     </Button>
                     <Button
                       variant="outline"
                       size="icon"
-                      className="h-8 w-8"
+                      className="h-7 w-7 sm:h-8 sm:w-8"
                       onClick={(e) => e.preventDefault()}
                     >
-                      <Heart className="h-3.5 w-3.5" />
+                      <Heart className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                     </Button>
                   </div>
                 </div>
@@ -582,7 +593,7 @@ function ProductCard({
 
   // Grid view card
   return (
-    <Card className="group overflow-hidden border-border/60 transition-all duration-300 hover:shadow-lg hover:border-border hover:-translate-y-0.5">
+    <Card className="group overflow-hidden border-border/60 rounded-lg sm:rounded-xl transition-all duration-300 hover:shadow-lg hover:border-border hover:-translate-y-0.5">
       <Link href={`/products/${product._id}`}>
         <CardContent className="p-0">
           {/* Image */}
@@ -593,81 +604,70 @@ function ProductCard({
                 alt={product.name}
                 fill
                 className="object-cover transition-transform duration-500 group-hover:scale-105"
-                sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                sizes="(max-width: 480px) 47vw, (max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
               />
             ) : (
               <div className="flex h-full w-full items-center justify-center text-muted-foreground">
-                <Package className="h-10 w-10" />
+                <Package className="h-8 w-8 sm:h-10 sm:w-10" />
               </div>
             )}
 
             {/* Overlays */}
             {product.label && (
-              <div className="absolute left-3 top-3">
-                <Badge className="bg-foreground/90 text-background text-[10px] px-2 py-0.5 font-medium backdrop-blur-sm">
-                  <Sparkles className="mr-1 h-3 w-3" />
+              <div className="absolute left-2 top-2 sm:left-3 sm:top-3">
+                <Badge className="bg-foreground/90 text-background text-[9px] sm:text-[10px] px-1.5 sm:px-2 py-0.5 font-medium backdrop-blur-sm">
+                  <Sparkles className="mr-0.5 sm:mr-1 h-2.5 w-2.5 sm:h-3 sm:w-3" />
                   {product.label}
                 </Badge>
               </div>
             )}
             {discount > 0 && (
-              <div className="absolute right-3 top-3">
-                <span className="inline-flex items-center rounded-md bg-rose-500 px-2 py-0.5 text-[10px] font-bold text-white shadow-sm">
+              <div className="absolute right-2 top-2 sm:right-3 sm:top-3">
+                <span className="inline-flex items-center rounded-md bg-rose-500 px-1.5 sm:px-2 py-0.5 text-[9px] sm:text-[10px] font-bold text-white shadow-sm">
                   {discount}% OFF
                 </span>
               </div>
             )}
 
-            {/* Quick Actions — visible on hover */}
-            <div className="absolute bottom-0 left-0 right-0 flex gap-2 p-3 translate-y-full opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
-              <Button
-                size="sm"
-                className="flex-1 h-9 bg-foreground text-background hover:bg-foreground/90 shadow-lg text-xs"
-                onClick={(e) => e.preventDefault()}
-              >
-                <ShoppingCart className="mr-1.5 h-3.5 w-3.5" />
-                Add to Cart
-              </Button>
-              <Button
-                variant="outline"
-                size="icon"
-                className="h-9 w-9 bg-background/90 backdrop-blur-sm shadow-lg border-border/50"
-                onClick={(e) => e.preventDefault()}
-              >
-                <Heart className="h-4 w-4" />
-              </Button>
-            </div>
+            {/* Wishlist — always visible on mobile, hover on desktop */}
+            <button
+              className="absolute right-2 bottom-2 sm:right-3 sm:bottom-3 flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-full bg-white/80 dark:bg-black/60 backdrop-blur-sm shadow-md border border-white/20 transition-all duration-200 hover:bg-white hover:scale-110 active:scale-95 sm:opacity-0 sm:translate-y-2 sm:group-hover:opacity-100 sm:group-hover:translate-y-0"
+              onClick={(e) => e.preventDefault()}
+              aria-label="Add to wishlist"
+            >
+              <Heart className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-foreground/70" />
+            </button>
           </div>
 
           {/* Details */}
-          <div className="space-y-1.5 p-3 sm:p-4">
-            <p className="text-[10px] font-medium uppercase tracking-[0.1em] text-muted-foreground">
+          <div className="space-y-1 sm:space-y-1.5 p-2.5 sm:p-4">
+            <p className="text-[9px] sm:text-[10px] font-medium uppercase tracking-[0.12em] text-muted-foreground truncate">
               {product.category} · {product.subCategory}
             </p>
-            <h3 className="line-clamp-1 text-sm font-medium leading-snug text-foreground group-hover:text-primary transition-colors">
+            <h3 className="line-clamp-1 text-[13px] sm:text-sm font-medium leading-snug text-foreground group-hover:text-primary transition-colors">
               {product.name}
             </h3>
 
-            <div className="flex items-baseline gap-2 pt-0.5">
-              <span className="text-base font-bold text-foreground">
+            <div className="flex items-baseline gap-1.5 sm:gap-2 pt-0.5">
+              <span className="text-sm sm:text-base font-bold text-foreground">
                 ₹{product.price.toLocaleString("en-IN")}
               </span>
               {product.mrp > product.price && (
-                <span className="text-xs text-muted-foreground line-through">
+                <span className="text-[10px] sm:text-xs text-muted-foreground line-through">
                   ₹{product.mrp.toLocaleString("en-IN")}
                 </span>
               )}
               {discount > 0 && (
-                <span className="text-[11px] font-semibold text-emerald-600">
-                  Save {discount}%
+                <span className="text-[10px] sm:text-[11px] font-semibold text-emerald-600">
+                  {discount}% off
                 </span>
               )}
             </div>
 
             {(product.averageRating > 0 || product.ratingCount > 0) && (
-              <div className="flex items-center gap-1.5 pt-0.5">
+              <div className="flex items-center gap-1 sm:gap-1.5 pt-0.5">
                 <StarRating rating={product.averageRating || 0} size="sm" />
-                <span className="text-[11px] text-muted-foreground">
+                <span className="text-[10px] sm:text-[11px] text-muted-foreground">
                   {product.averageRating > 0
                     ? product.averageRating.toFixed(1)
                     : "0"}
@@ -677,6 +677,18 @@ function ProductCard({
                 </span>
               </div>
             )}
+
+            {/* Mobile Add-to-Cart — always visible on touch devices */}
+            <div className="pt-1.5 sm:hidden">
+              <Button
+                size="sm"
+                className="w-full h-8 text-[11px] font-medium bg-foreground text-background hover:bg-foreground/90"
+                onClick={(e) => e.preventDefault()}
+              >
+                <ShoppingCart className="mr-1.5 h-3 w-3" />
+                Add to Bag
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Link>
@@ -690,13 +702,14 @@ function ProductCard({
 
 function SkeletonCard() {
   return (
-    <Card className="overflow-hidden border-border/60">
+    <Card className="overflow-hidden border-border/60 rounded-lg sm:rounded-xl">
       <div className="aspect-[3/4] animate-pulse bg-muted" />
-      <CardContent className="p-3 sm:p-4 space-y-2.5">
-        <div className="h-2.5 w-16 animate-pulse rounded-full bg-muted" />
-        <div className="h-4 w-3/4 animate-pulse rounded bg-muted" />
-        <div className="h-5 w-1/3 animate-pulse rounded bg-muted" />
-        <div className="h-3 w-1/2 animate-pulse rounded bg-muted" />
+      <CardContent className="p-2.5 sm:p-4 space-y-2">
+        <div className="h-2 w-14 sm:h-2.5 sm:w-16 animate-pulse rounded-full bg-muted" />
+        <div className="h-3.5 sm:h-4 w-3/4 animate-pulse rounded bg-muted" />
+        <div className="h-4 sm:h-5 w-1/3 animate-pulse rounded bg-muted" />
+        <div className="h-2.5 sm:h-3 w-1/2 animate-pulse rounded bg-muted" />
+        <div className="h-8 w-full animate-pulse rounded bg-muted sm:hidden" />
       </CardContent>
     </Card>
   );
@@ -757,18 +770,24 @@ export default function ProductList() {
     <div className="min-h-screen bg-background">
       {/* Page Header */}
       <div className="border-b border-border/60 bg-gradient-to-b from-muted/40 to-background">
-        <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-10 lg:px-8">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6 sm:py-10 lg:px-8">
+          <div className="flex flex-col gap-3 sm:gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl font-serif">
+              <div className="flex items-center gap-2 mb-1.5 sm:mb-2">
+                <span className="inline-block h-[2px] w-6 sm:w-8 bg-primary/70 rounded-full" />
+                <span className="text-[10px] sm:text-xs font-medium uppercase tracking-[0.2em] text-primary/80">
+                  Curated for You
+                </span>
+              </div>
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-semibold tracking-tight font-serif">
                 Our Collection
               </h1>
-              <p className="mt-1.5 text-sm text-muted-foreground max-w-md">
+              <p className="mt-1 sm:mt-1.5 text-xs sm:text-sm text-muted-foreground max-w-md leading-relaxed">
                 Explore timeless ethnic wear — handpicked kurtas, sarees, lehengas & more for every occasion.
               </p>
             </div>
             {!isLoading && totalProducts > 0 && (
-              <p className="text-sm text-muted-foreground">
+              <p className="text-xs sm:text-sm text-muted-foreground">
                 <span className="font-medium text-foreground">{totalProducts}</span>{" "}
                 {totalProducts === 1 ? "product" : "products"} found
               </p>
@@ -778,8 +797,8 @@ export default function ProductList() {
       </div>
 
       {/* Main Layout */}
-      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-        <div className="flex gap-8">
+      <div className="mx-auto max-w-7xl px-3 py-4 sm:px-6 sm:py-6 lg:px-8">
+        <div className="flex gap-6 lg:gap-8">
           {/* Desktop Sidebar */}
           <aside className="hidden w-60 shrink-0 lg:block">
             <div className="sticky top-6">
@@ -794,65 +813,129 @@ export default function ProductList() {
           {/* Products Area */}
           <main className="min-w-0 flex-1">
             {/* Toolbar */}
-            <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex items-center gap-3">
-                {/* Mobile filter trigger */}
-                <Sheet
-                  open={mobileFiltersOpen}
-                  onOpenChange={setMobileFiltersOpen}
-                >
-                  <SheetTrigger>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="lg:hidden h-9"
+            <div className="mb-4 sm:mb-5 space-y-3">
+              {/* Search — full width on mobile */}
+              <div className="relative w-full sm:max-w-xs">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  placeholder="Search kurtas, sarees, lehengas..."
+                  value={filters.searchQuery || ""}
+                  onChange={(e) => handleSearchChange(e.target.value)}
+                  className="h-9 sm:h-10 pl-10 text-xs sm:text-sm rounded-lg"
+                />
+              </div>
+
+              {/* Filter / Sort / View row */}
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  {/* Mobile filter trigger */}
+                  <Sheet
+                    open={mobileFiltersOpen}
+                    onOpenChange={setMobileFiltersOpen}
+                  >
+                    <SheetTrigger
+                      render={
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="lg:hidden h-8 sm:h-9 text-[11px] sm:text-xs gap-1.5 px-2.5 sm:px-3 rounded-lg"
+                        />
+                      }
                     >
-                      <SlidersHorizontal className="mr-2 h-4 w-4" />
+                      <SlidersHorizontal className="h-3.5 w-3.5" />
                       Filters
-                    </Button>
-                  </SheetTrigger>
-                  <SheetContent side="left" className="w-80 sm:w-96">
-                    <SheetHeader>
-                      <SheetTitle className="text-base">Filters</SheetTitle>
-                    </SheetHeader>
-                    <ScrollArea className="h-[calc(100vh-6rem)] pr-4">
-                      <div className="py-4">
+                      {(() => {
+                        const count = [
+                          filters.category,
+                          filters.subCategory,
+                          filters.design,
+                          filters.priceMin,
+                          filters.priceMax,
+                          filters.rating,
+                        ].filter(Boolean).length;
+                        return count > 0 ? (
+                          <span className="ml-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary text-[9px] font-bold text-primary-foreground px-1">
+                            {count}
+                          </span>
+                        ) : null;
+                      })()}
+                    </SheetTrigger>
+                    <SheetContent side="left" className="w-[88vw] max-w-[380px] sm:w-96 p-0">
+                      <SheetHeader className="px-5 pt-5 pb-3">
+                        <SheetTitle className="text-lg font-semibold tracking-tight">
+                          Refine Your Style
+                        </SheetTitle>
+                        <SheetDescription className="text-xs text-muted-foreground">
+                          Narrow down from{" "}
+                          <span className="font-medium text-foreground">
+                            {typedProductData?.total ?? "..."}
+                          </span>{" "}
+                          styles to find your perfect match.
+                        </SheetDescription>
+                      </SheetHeader>
+
+                      <Separator />
+
+                      <SheetPanel className="px-5 py-4">
                         <FilterSection
                           filters={filters}
                           setFilters={setFilters}
                           onApplyFilters={handleApplyFilters}
                         />
-                      </div>
-                    </ScrollArea>
-                  </SheetContent>
-                </Sheet>
+                      </SheetPanel>
 
-                {/* Search */}
-                <div className="relative flex-1 sm:max-w-xs">
-                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                  <Input
-                    placeholder="Search products..."
-                    value={filters.searchQuery || ""}
-                    onChange={(e) => handleSearchChange(e.target.value)}
-                    className="h-9 pl-10 text-sm"
-                  />
+                      <SheetFooter className="px-5 py-4 border-t bg-muted/30 gap-3 flex-row">
+                        <Button
+                          variant="outline"
+                          className="flex-1 h-11 text-xs font-medium rounded-lg"
+                          onClick={() => {
+                            setFilters({
+                              searchQuery: "",
+                              category: "",
+                              subCategory: "",
+                              design: "",
+                              priceMin: "",
+                              priceMax: "",
+                              rating: "",
+                              page: 1,
+                              limit: 12,
+                              viewMode: filters.viewMode,
+                            });
+                          }}
+                        >
+                          <X className="mr-1.5 h-3.5 w-3.5" />
+                          Clear All
+                        </Button>
+                        <SheetClose
+                          render={
+                            <Button
+                              className="flex-[2] h-11 text-sm font-semibold rounded-lg shadow-sm"
+                            />
+                          }
+                          onClick={() => {
+                            handleApplyFilters();
+                          }}
+                        >
+                          Show{typedProductData?.total ? ` ${typedProductData.total}` : ""} Results
+                        </SheetClose>
+                      </SheetFooter>
+                    </SheetContent>
+                  </Sheet>
+
+                  {/* Sort — visible on all devices */}
+                  <Select defaultValue="newest">
+                    <SelectTrigger className="h-8 sm:h-9 w-[130px] sm:w-[160px] text-[11px] sm:text-xs" aria-label="Sort">
+                      <SelectValue placeholder="Sort by" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {SORT_OPTIONS.map((opt) => (
+                        <SelectItem key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
-              </div>
-
-              <div className="flex items-center gap-2">
-                {/* Sort (hidden for now – can wire up later) */}
-                <Select defaultValue="newest">
-                  <SelectTrigger className="h-9 w-[160px] text-xs hidden sm:flex" aria-label="Sort">
-                    <SelectValue placeholder="Sort by" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {SORT_OPTIONS.map((opt) => (
-                      <SelectItem key={opt.value} value={opt.value}>
-                        {opt.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
 
                 {/* View toggle */}
                 <ToggleGroup
@@ -862,11 +945,11 @@ export default function ProductList() {
                     if (next) setFilters((prev) => ({ ...prev, viewMode: next }));
                   }}
                 >
-                  <ToggleGroupItem value="grid" aria-label="Grid view" className="h-9 w-9 p-0">
-                    <Grid3X3 className="h-4 w-4" />
+                  <ToggleGroupItem value="grid" aria-label="Grid view" className="h-8 w-8 sm:h-9 sm:w-9 p-0">
+                    <Grid3X3 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                   </ToggleGroupItem>
-                  <ToggleGroupItem value="list" aria-label="List view" className="h-9 w-9 p-0">
-                    <LayoutList className="h-4 w-4" />
+                  <ToggleGroupItem value="list" aria-label="List view" className="h-8 w-8 sm:h-9 sm:w-9 p-0">
+                    <LayoutList className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                   </ToggleGroupItem>
                 </ToggleGroup>
               </div>
@@ -875,19 +958,19 @@ export default function ProductList() {
             {/* Active filter chips */}
             <ActiveFilters filters={filters} setFilters={setFilters} />
 
-            {/* Product count on mobile */}
+            {/* Product count */}
             {!isLoading && totalProducts > 0 && (
-              <div className="mb-4 mt-2 flex items-center justify-between text-xs text-muted-foreground sm:text-sm">
+              <div className="mb-3 sm:mb-4 mt-1 flex items-center justify-between text-[11px] sm:text-xs text-muted-foreground">
                 <span>
                   Showing{" "}
                   <span className="font-medium text-foreground">
                     {((filters.page ?? 1) - 1) * pageSize + 1}
-                  </span>{" "}
-                  –{" "}
+                  </span>
+                  {"–"}
                   <span className="font-medium text-foreground">
                     {Math.min((filters.page ?? 1) * pageSize, totalProducts)}
                   </span>{" "}
-                  of {totalProducts}
+                  of {totalProducts} styles
                 </span>
               </div>
             )}
@@ -908,7 +991,7 @@ export default function ProductList() {
             ) : isLoading && productsToDisplay.length === 0 ? (
               <div
                 className={cn(
-                  "grid gap-4 sm:gap-5",
+                  "grid gap-3 sm:gap-4 lg:gap-5",
                   filters.viewMode === "grid"
                     ? "grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4"
                     : "grid-cols-1"
@@ -953,7 +1036,7 @@ export default function ProductList() {
             ) : (
               <div
                 className={cn(
-                  "grid gap-4 sm:gap-5",
+                  "grid gap-3 sm:gap-4 lg:gap-5",
                   filters.viewMode === "grid"
                     ? "grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4"
                     : "grid-cols-1"
@@ -971,9 +1054,9 @@ export default function ProductList() {
 
             {/* Pagination */}
             {totalPages > 1 && (
-              <div className="mt-10 flex justify-center">
+              <div className="mt-8 sm:mt-10 flex justify-center">
                 <Pagination>
-                  <PaginationContent>
+                  <PaginationContent className="gap-0.5 sm:gap-1">
                     <PaginationItem>
                       <PaginationPrevious
                         href="#"
@@ -984,25 +1067,56 @@ export default function ProductList() {
                           }
                         }}
                         className={cn(
+                          "h-8 sm:h-9 px-2 sm:px-3 text-xs",
                           (filters.page || 1) <= 1 &&
-                            "pointer-events-none opacity-50"
+                          "pointer-events-none opacity-50"
                         )}
                       />
                     </PaginationItem>
-                    {[...Array(totalPages)].map((_, i) => (
-                      <PaginationItem key={i}>
-                        <PaginationLink
-                          href="#"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            handlePageChange(i + 1);
-                          }}
-                          isActive={(filters.page || 1) === i + 1}
-                        >
-                          {i + 1}
-                        </PaginationLink>
-                      </PaginationItem>
-                    ))}
+                    {(() => {
+                      const currentPage = filters.page || 1;
+                      const pages: (number | "ellipsis")[] = [];
+
+                      if (totalPages <= 5) {
+                        // Show all pages
+                        for (let i = 1; i <= totalPages; i++) pages.push(i);
+                      } else {
+                        // Always show first page
+                        pages.push(1);
+                        if (currentPage > 3) pages.push("ellipsis");
+                        // Pages around current
+                        const start = Math.max(2, currentPage - 1);
+                        const end = Math.min(totalPages - 1, currentPage + 1);
+                        for (let i = start; i <= end; i++) pages.push(i);
+                        if (currentPage < totalPages - 2) pages.push("ellipsis");
+                        // Always show last page
+                        pages.push(totalPages);
+                      }
+
+                      return pages.map((page, idx) =>
+                        page === "ellipsis" ? (
+                          <PaginationItem key={`ellipsis-${idx}`}>
+                            <span className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center text-xs text-muted-foreground">
+                              …
+                            </span>
+                          </PaginationItem>
+                        ) : (
+                          <PaginationItem key={page}>
+                            <PaginationLink
+                              href="#"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                handlePageChange(page);
+                              }}
+                              isActive={currentPage === page}
+                              className="h-8 w-8 sm:h-9 sm:w-9 text-xs p-0"
+                            >
+                              {page}
+                            </PaginationLink>
+                          </PaginationItem>
+                        )
+                      );
+                    })()}
                     <PaginationItem>
                       <PaginationNext
                         href="#"
@@ -1013,8 +1127,9 @@ export default function ProductList() {
                           }
                         }}
                         className={cn(
+                          "h-8 sm:h-9 px-2 sm:px-3 text-xs",
                           (filters.page || 1) >= totalPages &&
-                            "pointer-events-none opacity-50"
+                          "pointer-events-none opacity-50"
                         )}
                       />
                     </PaginationItem>

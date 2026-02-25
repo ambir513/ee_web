@@ -5,23 +5,23 @@ import { Truck, RotateCcw, Shield, Sparkles } from "lucide-react";
 const features = [
   {
     icon: Truck,
-    title: "Free Shipping",
-    description: "On orders above ₹2,999",
+    title: "Complimentary Shipping",
+    description: "Free delivery on every order, nationwide",
   },
   {
     icon: RotateCcw,
-    title: "Easy Returns",
-    description: "15-day hassle-free returns",
+    title: "Exchange Only",
+    description: "Hassle-free exchanges within 7 days",
   },
   {
     icon: Shield,
-    title: "Secure Payment",
-    description: "100% secure checkout",
+    title: "Secure Checkout",
+    description: "SSL-encrypted payments you can trust",
   },
   {
     icon: Sparkles,
     title: "Artisan Crafted",
-    description: "Handmade with love",
+    description: "Handcrafted with heritage techniques",
   },
 ];
 
