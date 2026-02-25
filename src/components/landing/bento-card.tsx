@@ -19,7 +19,7 @@ const collections = [
     title: "Chikankari",
     subtitle: "Lucknowi Elegance",
     description: "Timeless white threadwork",
-    image: "/images/kurta-2.jpg",
+    image: "/images/kurta-2.jpeg",
     href: "#",
     size: "medium",
   },
