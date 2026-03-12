@@ -3,10 +3,19 @@ import { Footer } from "@/components/landing/footer";
 import { Features } from "@/components/landing/feature";
 import ContactPageContent from "@/components/landing/contact-sections";
 
-export const metadata = {
-  title: "Contact | Ethnic Elegance",
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Contact Us",
   description:
-    "Contact Ethnic Elegance. We respond within 24–48 hours.",
+    "Get in touch with Ethnic Elegance for any queries about orders, shipping, returns or collaborations. We respond within 24–48 hours.",
+  alternates: { canonical: "/contact" },
+  openGraph: {
+    title: "Contact Us | Ethnic Elegance",
+    description:
+      "Reach out to Ethnic Elegance for order enquiries, feedback, or partnership opportunities.",
+    url: "/contact",
+  },
 };
 
 export default function ContactPage() {

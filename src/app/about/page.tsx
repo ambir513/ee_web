@@ -8,10 +8,19 @@ import {
   AboutCta,
 } from "@/components/landing/about-sections";
 
-export const metadata = {
-  title: "About Us | Ethnic Elegance",
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "About Us",
   description:
-    "Ethnic Elegance is a women's garments and ethnic wear retail website. Discover our story, values, and curated collection of kurtas, sarees, and more.",
+    "Learn about Ethnic Elegance – our story, values, and commitment to premium women's ethnic wear. Curated kurtas, sarees, lehengas and handcrafted designs.",
+  alternates: { canonical: "/about" },
+  openGraph: {
+    title: "About Us | Ethnic Elegance",
+    description:
+      "Discover the story behind Ethnic Elegance – premium women's ethnic wear with handcrafted designs and quality fabrics.",
+    url: "/about",
+  },
 };
 
 export default function AboutPage() {

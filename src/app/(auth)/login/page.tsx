@@ -1,5 +1,13 @@
+import type { Metadata } from "next";
 import { LoginForm } from "@/components/auth/login-form";
 import Image from "next/image";
+
+export const metadata: Metadata = {
+  title: "Login",
+  description:
+    "Sign in to your Ethnic Elegance account to access orders, wishlist and exclusive offers.",
+  robots: { index: false, follow: false },
+};
 
 export default function LoginPage() {
   return (

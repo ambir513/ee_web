@@ -1,5 +1,13 @@
+import type { Metadata } from "next";
 import { SignupForm } from "@/components/auth/signup-form";
 import Image from "next/image";
+
+export const metadata: Metadata = {
+  title: "Create Account",
+  description:
+    "Join Ethnic Elegance – create your account to shop premium women's ethnic wear with exclusive member benefits.",
+  robots: { index: false, follow: false },
+};
 
 export default function SignupPage() {
   return (
