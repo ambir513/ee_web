@@ -27,8 +27,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     }
 
     const product = res.data;
-    const image =
-      product.variants?.[0]?.images?.[0] || "/images/og-banner.png";
     const price = product.price;
     const discount =
       product.mrp > product.price
@@ -36,9 +34,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         : 0;
 
     const title = product.name;
-    const description =
-      product.description?.slice(0, 155) ||
-      `Shop ${product.name} at Ethnic Elegance. Premium ethnic wear starting at ₹${price}.`;
+    const priceText = `₹${price.toLocaleString("en-IN")}`;
+    const description = product.description?.slice(0, 120)
+      ? `${product.description.slice(0, 120)} — ${priceText} at Ethnic Elegance.`
+      : `Shop ${product.name} at ${priceText}. Premium ethnic wear at Ethnic Elegance.`;
 
     return {
       title,
@@ -49,21 +48,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         description,
         url: `${SITE_URL}/products/${id}`,
         siteName: "Ethnic Elegance",
-        images: [
-          {
-            url: image,
-            width: 800,
-            height: 800,
-            alt: product.name,
-          },
-        ],
         type: "website",
       },
       twitter: {
         card: "summary_large_image",
         title: `${product.name} | Ethnic Elegance`,
         description,
-        images: [image],
       },
       other: {
         "product:price:amount": String(price),
