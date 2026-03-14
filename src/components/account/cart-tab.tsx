@@ -226,9 +226,7 @@ export function CartTab() {
   const items: CartItem[] = (cartData?.data || []).filter(
     (item: CartItem) => item.productId != null,
   );
-  const addresses: AddressData[] = (addressData?.data || []).map(
-    (a: any) => a,
-  );
+  const addresses: AddressData[] = (addressData?.data || []).map((a: any) => a);
   const user = userData?.data;
 
   const updateQuantity = (itemId: string, delta: number) => {
@@ -397,7 +395,8 @@ export function CartTab() {
         toastManager.add({
           title: "Order Error",
           description:
-            orderResponse?.message || "Failed to create order. Please try again.",
+            orderResponse?.message ||
+            "Failed to create order. Please try again.",
           type: "error",
         });
         setIsProcessingPayment(false);
@@ -408,7 +407,8 @@ export function CartTab() {
 
       // 3. Open Razorpay checkout
       const options = {
-        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_test_X7oXoYI3bvY2r1",
+        key:
+          process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_test_X7oXoYI3bvY2r1",
         amount: razorpayOrder.amount,
         currency: razorpayOrder.currency,
         name: "Ethnic Edge",
@@ -472,7 +472,8 @@ export function CartTab() {
             setIsProcessingPayment(false);
             toastManager.add({
               title: "Payment Cancelled",
-              description: "You cancelled the payment. Your cart is still saved.",
+              description:
+                "You cancelled the payment. Your cart is still saved.",
               type: "info",
             });
           },
@@ -491,11 +492,17 @@ export function CartTab() {
         });
       });
       razorpay.open();
-    } catch (err) {
+    } catch (err: any) {
+      const fallbackMessage = "Something went wrong. Please try again.";
+      const message =
+        typeof err?.message === "string" && err.message.trim().length > 0
+          ? err.message
+          : fallbackMessage;
+
       setIsProcessingPayment(false);
       toastManager.add({
         title: "Error",
-        description: "Something went wrong. Please try again.",
+        description: message,
         type: "error",
       });
     }
@@ -788,8 +795,8 @@ export function CartTab() {
                 const discount =
                   product.mrp > product.price
                     ? Math.round(
-                      ((product.mrp - product.price) / product.mrp) * 100,
-                    )
+                        ((product.mrp - product.price) / product.mrp) * 100,
+                      )
                     : 0;
 
                 return (
@@ -910,9 +917,7 @@ export function CartTab() {
                         </div>
                       </div>
                     </div>
-                    {index < items.length - 1 && (
-                      <Separator className="mt-4" />
-                    )}
+                    {index < items.length - 1 && <Separator className="mt-4" />}
                   </div>
                 );
               })}
@@ -1152,7 +1157,9 @@ function CouponSection({
                   placeholder="e.g. SAVE20"
                   value={couponInput}
                   onChange={(e) => onInputChange(e.target.value.toUpperCase())}
-                  onKeyDown={(e) => e.key === "Enter" && !isApplying && onApply(couponInput)}
+                  onKeyDown={(e) =>
+                    e.key === "Enter" && !isApplying && onApply(couponInput)
+                  }
                   disabled={isApplying}
                   className={cn(
                     "w-full rounded-lg border bg-background px-3.5 py-2.5 text-sm font-mono tracking-wider",

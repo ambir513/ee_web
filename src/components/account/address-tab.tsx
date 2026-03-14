@@ -105,8 +105,8 @@ const addressSchema = z.object({
   city: z.string().min(1, "City is required"),
   state: z.string().min(1, "State is required"),
   country: z.string().min(1, "Country is required"),
-  pinCode: z.string().min(6, "Pin Code must be 6 digits").max(6, "Pin Code must be 6 digits"),
-  phoneNo: z.string().min(10, "Phone Number must be 10 digits").max(10, "Phone Number must be 10 digits"),
+  pinCode: z.string().regex(/^\d{6}$/, "Pin Code must be 6 digits"),
+  phoneNo: z.string().regex(/^\d{10}$/, "Phone Number must be 10 digits"),
   isDefault: z.boolean(),
 });
 
@@ -242,7 +242,10 @@ function AddressForm({
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="rounded-xl border border-border bg-card p-6">
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      className="rounded-xl border border-border bg-card p-6"
+    >
       <h3 className="text-base font-semibold text-foreground">
         {isNew ? "Add New Address" : "Edit Address"}
       </h3>
@@ -274,7 +277,8 @@ function AddressForm({
             htmlFor="addressLine1"
             className="text-sm font-medium text-foreground"
           >
-            Room No/Flat No/Building Name/Chawl <span className="text-destructive">*</span>
+            Room No/Flat No/Building Name/Chawl{" "}
+            <span className="text-destructive">*</span>
           </Label>
           <Input
             id="addressLine1"
@@ -282,7 +286,9 @@ function AddressForm({
             placeholder="Room/Flat/Building/Chawl"
           />
           {errors.addressLine1 && (
-            <p className="text-xs text-destructive">{errors.addressLine1.message}</p>
+            <p className="text-xs text-destructive">
+              {errors.addressLine1.message}
+            </p>
           )}
         </div>
 
@@ -300,7 +306,9 @@ function AddressForm({
             placeholder="Area/Landmark"
           />
           {errors.addressLine2 && (
-            <p className="text-xs text-destructive">{errors.addressLine2.message}</p>
+            <p className="text-xs text-destructive">
+              {errors.addressLine2.message}
+            </p>
           )}
         </div>
 
@@ -318,23 +326,18 @@ function AddressForm({
             placeholder="Taluka/District"
           />
           {errors.addressLine3 && (
-            <p className="text-xs text-destructive">{errors.addressLine3.message}</p>
+            <p className="text-xs text-destructive">
+              {errors.addressLine3.message}
+            </p>
           )}
         </div>
 
         {/* City */}
         <div className="flex flex-col gap-1.5">
-          <Label
-            htmlFor="city"
-            className="text-sm font-medium text-foreground"
-          >
+          <Label htmlFor="city" className="text-sm font-medium text-foreground">
             City <span className="text-destructive">*</span>
           </Label>
-          <Input
-            id="city"
-            {...register("city")}
-            placeholder="City"
-          />
+          <Input id="city" {...register("city")} placeholder="City" />
           {errors.city && (
             <p className="text-xs text-destructive">{errors.city.message}</p>
           )}
@@ -397,13 +400,15 @@ function AddressForm({
           </Label>
           <Input
             id="pinCode"
-            {...register("pinCode")}
+            {...register("pinCode", {
+              setValueAs: (value) =>
+                String(value ?? "")
+                  .replace(/\D/g, "")
+                  .slice(0, 6),
+            })}
             placeholder="6-digit PIN code"
             maxLength={6}
-            onChange={(e) => {
-              const value = e.target.value.replace(/\D/g, '');
-              e.target.value = value;
-            }}
+            inputMode="numeric"
           />
           {errors.pinCode && (
             <p className="text-xs text-destructive">{errors.pinCode.message}</p>
@@ -424,13 +429,15 @@ function AddressForm({
             </div>
             <Input
               id="phoneNo"
-              {...register("phoneNo")}
+              {...register("phoneNo", {
+                setValueAs: (value) =>
+                  String(value ?? "")
+                    .replace(/\D/g, "")
+                    .slice(0, 10),
+              })}
               placeholder="10-digit mobile number"
               maxLength={10}
-              onChange={(e) => {
-                const value = e.target.value.replace(/\D/g, '');
-                e.target.value = value;
-              }}
+              inputMode="numeric"
             />
           </div>
           {errors.phoneNo && (
@@ -444,7 +451,12 @@ function AddressForm({
           {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           {isNew ? "Save Address" : "Update Address"}
         </Button>
-        <Button type="button" variant="outline" onClick={onCancel} disabled={isSaving}>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onCancel}
+          disabled={isSaving}
+        >
           Cancel
         </Button>
       </div>
@@ -476,11 +488,13 @@ export function AddressTab() {
   });
 
   // Transform addresses data: convert numbers to strings for form compatibility
-  const addresses: AddressData[] = (addressData?.data || []).map((addr: any) => ({
-    ...addr,
-    pinCode: addr.pinCode?.toString() || "",
-    phoneNo: addr.phoneNo?.toString() || "",
-  }));
+  const addresses: AddressData[] = (addressData?.data || []).map(
+    (addr: any) => ({
+      ...addr,
+      pinCode: addr.pinCode?.toString() || "",
+      phoneNo: addr.phoneNo?.toString() || "",
+    }),
+  );
   const canAddMore = addresses.length < MAX_ADDRESSES;
 
   // Create address mutation
@@ -681,4 +695,3 @@ export function AddressTab() {
     </div>
   );
 }
-

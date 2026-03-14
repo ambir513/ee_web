@@ -1,15 +1,14 @@
 "use client";
 
 import { Camera, Mail, MapPin, Calendar } from "lucide-react";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import Image from "next/image";
 
 interface ProfileHeaderProps {
   name: string;
   email: string;
-  avatar: string; 
+  avatar?: string | null;
   role: "USER" | "ADMIN";
   joinedDate: string;
   location?: string;
@@ -25,6 +24,12 @@ export function ProfileHeader({
   avatar,
   onEditProfile,
 }: ProfileHeaderProps) {
+  const hasAvatar = typeof avatar === "string" && avatar.trim().length > 0;
+  const initials = (
+    name?.trim()?.[0] ||
+    email?.trim()?.[0] ||
+    "U"
+  ).toUpperCase();
 
   return (
     <div className="rounded-xl border border-border bg-card p-6">
@@ -32,8 +37,9 @@ export function ProfileHeader({
         <div className="flex items-center gap-4">
           <div className="relative">
             <Avatar className="h-20 w-20 border-2 border-border">
+              {hasAvatar && <AvatarImage src={avatar} alt={`${name} avatar`} />}
               <AvatarFallback className="bg-muted text-lg font-semibold text-foreground">
-                <Image src={avatar} alt="Avatar"  className="object-cover"  width={100} height={100} />
+                {initials}
               </AvatarFallback>
             </Avatar>
             <button

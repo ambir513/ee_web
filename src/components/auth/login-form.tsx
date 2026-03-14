@@ -14,12 +14,14 @@ import Logo from "@/utils/logo";
 import { useRouter } from "next/navigation";
 import { toastManager } from "../ui/toast";
 import { api } from "@/lib/api";
+import { useQueryClient } from "@tanstack/react-query";
 
 type Schema = z.infer<typeof LoginSchema>;
 
 export function LoginForm({ className, ...props }: { className?: string }) {
   const [showPassword, setShowPassword] = useState(false);
   const route = useRouter();
+  const queryClient = useQueryClient();
   const [message, setMessage] = useState<{ status: boolean; message: string }>({
     status: true,
     message: "",
@@ -50,6 +52,7 @@ export function LoginForm({ className, ...props }: { className?: string }) {
         type: "success",
         title: result.message,
       });
+      await queryClient.invalidateQueries({ queryKey: ["getUser"] });
       route.push("/");
     } catch (error: any) {
       console.log(error);

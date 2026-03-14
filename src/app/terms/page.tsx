@@ -1,6 +1,14 @@
 "use client";
 
 import Link from "next/link";
+import {
+  FileText,
+  ShieldCheck,
+  Truck,
+  RotateCcw,
+  CreditCard,
+  UserCog,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -25,7 +33,7 @@ const sections = [
   },
   {
     title: "Returns & Refunds",
-    body: `Eligible items may be returned within the stated return window in original condition. Refunds are processed to the original payment method after inspection.`,
+    body: `We offer exchange only. Refunds are not provided. Eligible exchange requests must be raised within the stated window, and items must be unused, in original condition, and with tags attached.`,
   },
   {
     title: "Use of Content",
@@ -54,59 +62,124 @@ const sections = [
 ];
 
 export default function TermsPage() {
+  const highlights = [
+    { label: "Accounts", icon: UserCog },
+    { label: "Orders", icon: CreditCard },
+    { label: "Shipping", icon: Truck },
+    { label: "Returns", icon: RotateCcw },
+    { label: "Privacy", icon: ShieldCheck },
+  ];
+
   return (
-    <div className="min-h-screen bg-background px-4 py-10">
-      <div className="mx-auto flex w-full max-w-4xl flex-col gap-6">
-        <div className="space-y-2 text-center">
-          <h1 className="text-3xl font-semibold tracking-tight">
-            Terms & Conditions
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Please read these terms carefully before using our website or
-            services.
-          </p>
-        </div>
-
-        <Card>
-          <CardHeader className="flex flex-col gap-2">
-            <CardTitle className="text-xl">Summary</CardTitle>
-            <p className="text-sm text-muted-foreground">
-              This summary highlights key points. Please review the full
-              sections below.
-            </p>
-            <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
-              <span>• Accounts</span>
-              <span>• Orders</span>
-              <span>• Shipping</span>
-              <span>• Returns</span>
-              <span>• Privacy</span>
+    <div className="min-h-screen bg-muted/20 px-4 py-8 sm:py-10">
+      <div className="mx-auto w-full max-w-6xl">
+        <section className="rounded-2xl border border-border bg-card p-6 sm:p-8 lg:p-10">
+          <div className="flex flex-col gap-4 sm:gap-5">
+            <div className="inline-flex w-fit items-center gap-2 rounded-full border border-border bg-muted/60 px-3 py-1 text-xs font-medium text-muted-foreground">
+              <FileText className="h-3.5 w-3.5" />
+              Legal Information
             </div>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {sections.map((section, idx) => (
-              <div key={section.title} className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-lg font-semibold">{section.title}</h2>
-                  <span className="text-xs text-muted-foreground">
-                    {idx + 1}
+            <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl lg:text-4xl">
+              Terms & Conditions
+            </h1>
+            <p className="max-w-3xl text-sm leading-relaxed text-muted-foreground sm:text-base">
+              Please read these terms carefully before using our website,
+              placing an order, or using our services. By continuing to use
+              Ethnic Elegance, you agree to the terms described below.
+            </p>
+            <div className="flex flex-wrap gap-2 pt-1">
+              {highlights.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <span
+                    key={item.label}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-border bg-background px-3 py-1.5 text-xs font-medium text-muted-foreground"
+                  >
+                    <Icon className="h-3.5 w-3.5" />
+                    {item.label}
                   </span>
-                </div>
-                <p className="text-sm leading-relaxed text-muted-foreground">
-                  {section.body}
-                </p>
-                {idx < sections.length - 1 && <Separator />}
-              </div>
-            ))}
-          </CardContent>
-        </Card>
+                );
+              })}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Last updated: March 14, 2026
+            </p>
+          </div>
+        </section>
 
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border bg-card px-4 py-3 text-sm text-muted-foreground">
-          <p>Questions about these terms? We can help.</p>
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" render={<Link href="/contact">Contact Support</Link>}>
-            </Button>
-            <Button size="sm" render={<Link href="/">Return Home</Link>}>
-            </Button>
+        <section className="mt-6 grid gap-6 lg:grid-cols-[280px_1fr]">
+          <Card className="h-fit lg:sticky lg:top-24">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">On This Page</CardTitle>
+              <p className="text-xs text-muted-foreground">
+                Quick jump to each section
+              </p>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              {sections.map((section, idx) => (
+                <a
+                  key={section.title}
+                  href={`#section-${idx + 1}`}
+                  className="flex items-center justify-between rounded-md border border-transparent px-2.5 py-2 text-sm text-muted-foreground transition-colors hover:border-border hover:bg-muted/50 hover:text-foreground"
+                >
+                  <span className="truncate pr-3">{section.title}</span>
+                  <span className="text-xs">{idx + 1}</span>
+                </a>
+              ))}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-col gap-2">
+              <CardTitle className="text-xl">Summary</CardTitle>
+              <p className="text-sm text-muted-foreground">
+                This summary highlights key points. Please review the full
+                sections below.
+              </p>
+            </CardHeader>
+            <CardContent className="space-y-5 sm:space-y-6">
+              {sections.map((section, idx) => (
+                <article
+                  id={`section-${idx + 1}`}
+                  key={section.title}
+                  className="scroll-mt-28 space-y-2"
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <h2 className="text-base font-semibold sm:text-lg">
+                      {section.title}
+                    </h2>
+                    <span className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-border bg-muted text-xs text-muted-foreground">
+                      {idx + 1}
+                    </span>
+                  </div>
+                  <p className="text-sm leading-relaxed text-muted-foreground sm:text-[15px]">
+                    {section.body}
+                  </p>
+                  {idx < sections.length - 1 && <Separator className="pt-1" />}
+                </article>
+              ))}
+            </CardContent>
+          </Card>
+        </section>
+
+        <div className="mt-6 flex flex-col gap-4 rounded-xl border bg-card px-4 py-4 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between sm:px-5">
+          <p>Questions about these terms? Our support team can help.</p>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              render={<Link href="/contact">Contact Support</Link>}
+            />
+            <Button
+              variant="outline"
+              size="sm"
+              render={<Link href="/policy">Privacy & Policy</Link>}
+            />
+            <Button
+              size="sm"
+              variant={"secondary"}
+              render={<Link href="/">Return Home</Link>}
+            />
           </div>
         </div>
       </div>

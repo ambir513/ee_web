@@ -1,6 +1,15 @@
 "use client";
 
-import { ChevronDown, Home, Menu, MapPin, ShoppingBag, User, Phone, Package } from "lucide-react";
+import {
+  ChevronDown,
+  Home,
+  Menu,
+  MapPin,
+  ShoppingBag,
+  User,
+  Phone,
+  Package,
+} from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState, useRef } from "react";
@@ -34,7 +43,7 @@ export function Header() {
   const catRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
 
-  const { data, isLoading, isError, error } = useQuery({
+  const { data } = useQuery({
     queryKey: ["getUser"],
     queryFn: async () => {
       const response = await api.get("/account/me", { queryClient });
@@ -67,6 +76,7 @@ export function Header() {
               <div className="md:hidden">
                 <Sheet>
                   <SheetTrigger
+                    id="mobile-nav-trigger"
                     render={
                       <Button
                         aria-label="Open navigation"
@@ -132,7 +142,9 @@ export function Header() {
                                   <Package className="size-4" />
                                   Categories
                                 </span>
-                                <ChevronDown className={`size-3.5 transition-transform ${mobileCatOpen ? "rotate-180" : ""}`} />
+                                <ChevronDown
+                                  className={`size-3.5 transition-transform ${mobileCatOpen ? "rotate-180" : ""}`}
+                                />
                               </button>
                               {mobileCatOpen && (
                                 <ul className="mt-2 ml-6 space-y-2">
@@ -332,7 +344,9 @@ export function Header() {
                     className="flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors"
                   >
                     Categories
-                    <ChevronDown className={`size-3.5 transition-transform duration-200 ${catOpen ? "rotate-180" : ""}`} />
+                    <ChevronDown
+                      className={`size-3.5 transition-transform duration-200 ${catOpen ? "rotate-180" : ""}`}
+                    />
                   </button>
                   {catOpen && (
                     <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-48 rounded-xl border border-border bg-card shadow-lg py-1.5 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
@@ -374,23 +388,22 @@ export function Header() {
               {data?.status ? (
                 <UserDropdown user={data.data} />
               ) : (
-                <>
-                  <Link
-                    href="/login"
-                    className="flex items-center gap-1 rounded-full border px-3 py-1.5 text-xs sm:text-sm text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
-                  >
-                    <User className="size-4" />
-                    <span className="hidden sm:inline">Sign in</span>
-                  </Link>
-                  <Link
-                    href="/login"
-                    className="relative inline-flex h-9 w-9 items-center justify-center rounded-full border bg-background hover:bg-accent transition-colors"
-                    aria-label="View shopping bag"
-                  >
-                    <ShoppingBag className="size-4" />
-                  </Link>
-                </>
+                <Link
+                  href="/login"
+                  className="flex items-center gap-1 rounded-full border px-3 py-1.5 text-xs sm:text-sm text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
+                >
+                  <User className="size-4" />
+                  <span className="hidden sm:inline">Sign in</span>
+                </Link>
               )}
+
+              <Link
+                href={data?.status ? "/account#cart" : "/login"}
+                className="relative inline-flex h-9 w-9 items-center justify-center rounded-full border bg-background hover:bg-accent transition-colors"
+                aria-label="View shopping bag"
+              >
+                <ShoppingBag className="size-4" />
+              </Link>
 
               <div className="hidden sm:block text-white">
                 <Button

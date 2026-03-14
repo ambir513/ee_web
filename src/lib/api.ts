@@ -18,6 +18,12 @@ type ApiOptions = RequestInit & {
   queryClient?: any; // TanStack Query client for accessing cached user state
 };
 
+type ApiFailure = {
+  status: false;
+  message: string;
+  data?: null;
+};
+
 /**
  * Helper function to get user data from TanStack Query cache
  */
@@ -56,16 +62,75 @@ function buildHeaders(options: ApiOptions = {}) {
   return headers;
 }
 
+async function parseApiResponse<T>(res: Response): Promise<T> {
+  const contentType = res.headers.get("content-type") || "";
+  const isJson = contentType.includes("application/json");
+
+  if (isJson) {
+    try {
+      const data = (await res.json()) as T;
+      if (!res.ok && data && typeof data === "object" && "status" in (data as any)) {
+        return data;
+      }
+      if (!res.ok) {
+        return {
+          status: false,
+          message: res.statusText || `Request failed with status ${res.status}`,
+          data: null,
+        } as T;
+      }
+      return data;
+    } catch {
+      return {
+        status: false,
+        message: "Invalid JSON response from server",
+        data: null,
+      } as T;
+    }
+  }
+
+  const text = await res.text();
+  if (!res.ok) {
+    return {
+      status: false,
+      message: text || res.statusText || `Request failed with status ${res.status}`,
+      data: null,
+    } as T;
+  }
+
+  return {
+    status: false,
+    message: "Unexpected non-JSON response from server",
+    data: null,
+  } as T;
+}
+
+async function safeFetch<T>(url: string, init: RequestInit): Promise<T> {
+  try {
+    const res = await fetch(url, init);
+    return parseApiResponse<T>(res);
+  } catch (error: any) {
+    const message =
+      typeof error?.message === "string" && error.message.length > 0
+        ? error.message
+        : "Network error. Please check your connection.";
+
+    return {
+      status: false,
+      message,
+      data: null,
+    } as T;
+  }
+}
+
 export const api = {
   get: async <T = any>(endpoint: string, options: ApiOptions = {}) => {
-    const res = await fetch(BASE_URL + endpoint, {
+    return safeFetch<T>(BASE_URL + endpoint, {
       method: "GET",
       credentials: "include",
       headers: buildHeaders(options),
       ...options,
     });
-
-    return res.json() as Promise<T>;
   },
 
   post: async <T = any>(
@@ -76,15 +141,13 @@ export const api = {
     const headers = buildHeaders(options);
     headers.set("Content-Type", "application/json");
 
-    const res = await fetch(BASE_URL + endpoint, {
+    return safeFetch<T>(BASE_URL + endpoint, {
       method: "POST",
       headers,
       body: JSON.stringify(data),
       credentials: "include",
       ...options,
     });
-
-    return res.json() as Promise<T>;
   },
 
   patch: async <T = any>(
@@ -95,25 +158,21 @@ export const api = {
     const headers = buildHeaders(options);
     headers.set("Content-Type", "application/json");
 
-    const res = await fetch(BASE_URL + endpoint, {
+    return safeFetch<T>(BASE_URL + endpoint, {
       method: "PATCH",
       headers,
       body: JSON.stringify(data),
       credentials: "include",
       ...options,
     });
-
-    return res.json() as Promise<T>;
   },
 
   delete: async <T = any>(endpoint: string, options: ApiOptions = {}) => {
-    const res = await fetch(BASE_URL + endpoint, {
+    return safeFetch<T>(BASE_URL + endpoint, {
       method: "DELETE",
       credentials: "include",
       headers: buildHeaders(options),
       ...options,
     });
-
-    return res.json() as Promise<T>;
   },
 };

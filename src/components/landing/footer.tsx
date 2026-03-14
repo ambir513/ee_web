@@ -14,9 +14,9 @@ const footerLinks = {
   ],
   help: [
     { name: "Contact Us", href: "/contact" },
+    { name: "Terms & Conditions", href: "/terms" },
+    { name: "Privacy & Policy", href: "/policy" },
     { name: "FAQs", href: "#" },
-    { name: "Shipping Info", href: "#" },
-    { name: "Returns", href: "#" },
   ],
   company: [
     { name: "About Us", href: "/about" },

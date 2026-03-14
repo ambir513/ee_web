@@ -175,7 +175,10 @@ function ImageZoomViewer({ imageSrc, isOpen, onClose }: ImageZoomViewerProps) {
         {/* Zoom Controls */}
         <div className="absolute bottom-3 left-3 sm:bottom-6 sm:left-6 flex flex-col gap-1.5 sm:gap-2 rounded-xl bg-white/10 p-2 sm:p-3 backdrop-blur-md">
           <button
-            onClick={(e) => { e.stopPropagation(); handleZoom("in"); }}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleZoom("in");
+            }}
             disabled={zoom >= ZOOM_MAX}
             className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg bg-white/20 text-white transition-all hover:bg-white/30 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
             aria-label="Zoom in"
@@ -183,9 +186,14 @@ function ImageZoomViewer({ imageSrc, isOpen, onClose }: ImageZoomViewerProps) {
             <ZoomIn size={16} className="sm:hidden" />
             <ZoomIn size={18} className="hidden sm:block" />
           </button>
-          <div className="w-9 sm:w-10 text-center text-[10px] sm:text-xs font-medium text-white">{zoomPercentage}%</div>
+          <div className="w-9 sm:w-10 text-center text-[10px] sm:text-xs font-medium text-white">
+            {zoomPercentage}%
+          </div>
           <button
-            onClick={(e) => { e.stopPropagation(); handleZoom("out"); }}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleZoom("out");
+            }}
             disabled={zoom <= ZOOM_MIN}
             className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg bg-white/20 text-white transition-all hover:bg-white/30 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
             aria-label="Zoom out"
@@ -195,7 +203,10 @@ function ImageZoomViewer({ imageSrc, isOpen, onClose }: ImageZoomViewerProps) {
           </button>
           {isMagnified && (
             <button
-              onClick={(e) => { e.stopPropagation(); handleReset(); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleReset();
+              }}
               className="mt-1 rounded-lg bg-white/20 px-2 py-1 text-[10px] sm:text-xs font-medium text-white transition-all hover:bg-white/30"
               aria-label="Reset zoom"
             >
@@ -249,20 +260,18 @@ function AccordionItem({
         <Plus
           className={cn(
             "h-4 w-4 text-muted-foreground transition-transform duration-300",
-            isOpen && "rotate-45"
+            isOpen && "rotate-45",
           )}
         />
       </button>
       <div
         className={cn(
           "grid transition-all duration-300 ease-in-out",
-          isOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+          isOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0",
         )}
       >
         <div className="overflow-hidden">
-          <div className="pb-5">
-            {children}
-          </div>
+          <div className="pb-5">{children}</div>
         </div>
       </div>
     </div>
@@ -309,7 +318,10 @@ function ProductSkeleton() {
         <div className="flex flex-col-reverse md:flex-row gap-4">
           <div className="flex md:flex-col gap-3 overflow-hidden">
             {[...Array(4)].map((_, i) => (
-              <div key={i} className="h-[80px] w-[60px] md:h-[100px] md:w-[75px] shrink-0 bg-muted animate-pulse" />
+              <div
+                key={i}
+                className="h-[80px] w-[60px] md:h-[100px] md:w-[75px] shrink-0 bg-muted animate-pulse"
+              />
             ))}
           </div>
           <div className="flex-1 aspect-[3/4] bg-muted animate-pulse" />
@@ -380,20 +392,25 @@ export default function ProductPage({ params }: ProductPageProps) {
     data: productResponse,
     isLoading: isProductLoading,
     error: productError,
-    refetch
+    refetch,
   } = useQuery({
     queryKey: ["product", id],
-    queryFn: () => api.get<{
-      status: boolean;
-      message?: string;
-      data?: ProductWithReviews;
-    }>(`/product/${encodeURIComponent(id)}`),
+    queryFn: () =>
+      api.get<{
+        status: boolean;
+        message?: string;
+        data?: ProductWithReviews;
+      }>(`/product/${encodeURIComponent(id)}`),
     enabled: isValidObjectId(id),
   });
 
   const product = productResponse?.data || null;
   const isLoading = isProductLoading;
-  const error = productError ? (productError as Error).message : (productResponse?.status === false ? productResponse.message : null);
+  const error = productError
+    ? (productError as Error).message
+    : productResponse?.status === false
+      ? productResponse.message
+      : null;
 
   useEffect(() => {
     if (product) {
@@ -409,7 +426,9 @@ export default function ProductPage({ params }: ProductPageProps) {
   const galleryImages = useMemo(() => {
     if (!product) return [] as string[];
     // Only show images from the currently selected color variant
-    const variant = product.variants?.find((v) => v.color === selectedVariant) || product.variants?.[0];
+    const variant =
+      product.variants?.find((v) => v.color === selectedVariant) ||
+      product.variants?.[0];
     if (!variant) return [] as string[];
     return (variant.images ?? []).filter(Boolean);
   }, [product, selectedVariant]);
@@ -500,7 +519,10 @@ export default function ProductPage({ params }: ProductPageProps) {
 
   const { data: watchlistData } = useQuery({
     queryKey: ["watchlist", id],
-    queryFn: () => api.get<{ status: boolean; data?: any }>(`/watchlist/${id}`, { queryClient }),
+    queryFn: () =>
+      api.get<{ status: boolean; data?: any }>(`/watchlist/${id}`, {
+        queryClient,
+      }),
     enabled: isValidObjectId(id),
     retry: false,
     refetchOnMount: false,
@@ -516,7 +538,10 @@ export default function ProductPage({ params }: ProductPageProps) {
     onSuccess: (res: any) => {
       if (res?.status) {
         // Optimistic: set cache directly, don't refetch (GET endpoint also adds)
-        queryClient.setQueryData(["watchlist", id], { status: true, data: res.data });
+        queryClient.setQueryData(["watchlist", id], {
+          status: true,
+          data: res.data,
+        });
         toastManager.add({
           title: "Added to Wishlist",
           description: `${product?.name} has been added to your wishlist.`,
@@ -525,7 +550,8 @@ export default function ProductPage({ params }: ProductPageProps) {
       } else {
         toastManager.add({
           title: "Already in Wishlist",
-          description: res?.message || "This product is already in your wishlist.",
+          description:
+            res?.message || "This product is already in your wishlist.",
           type: "info",
         });
       }
@@ -543,7 +569,10 @@ export default function ProductPage({ params }: ProductPageProps) {
     mutationFn: () => api.delete(`/watchlist/${id}`, { queryClient }),
     onSuccess: () => {
       // Optimistic: set cache to false immediately, don't refetch
-      queryClient.setQueryData(["watchlist", id], { status: false, data: null });
+      queryClient.setQueryData(["watchlist", id], {
+        status: false,
+        data: null,
+      });
       toastManager.add({
         title: "Removed from Wishlist",
         description: `${product?.name} has been removed from your wishlist.`,
@@ -560,14 +589,49 @@ export default function ProductPage({ params }: ProductPageProps) {
   });
 
   const handleToggleWishlist = useCallback(() => {
-    if (!isLoggedIn) { router.push("/login"); return; }
-    if (addToWishlistMutation.isPending || removeFromWishlistMutation.isPending) return;
+    if (!isLoggedIn) {
+      router.push("/login");
+      return;
+    }
+    if (addToWishlistMutation.isPending || removeFromWishlistMutation.isPending)
+      return;
     if (isWishlisted) {
       removeFromWishlistMutation.mutate();
     } else {
       addToWishlistMutation.mutate();
     }
-  }, [isLoggedIn, isWishlisted, addToWishlistMutation, removeFromWishlistMutation, router]);
+  }, [
+    isLoggedIn,
+    isWishlisted,
+    addToWishlistMutation,
+    removeFromWishlistMutation,
+    router,
+  ]);
+
+  const handleShare = useCallback(async () => {
+    const url = window.location.href;
+    const text = product
+      ? `${product.name} — ₹${product.price.toLocaleString("en-IN")} at Ethnic Elegance`
+      : "Check out this product on Ethnic Elegance";
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: product?.name || "Ethnic Elegance",
+          text,
+          url,
+        });
+      } catch {
+        // user cancelled share
+      }
+    } else {
+      await navigator.clipboard.writeText(url);
+      toastManager.add({
+        title: "Link Copied",
+        description: "Product link copied to clipboard.",
+      });
+    }
+  }, [product]);
 
   /* ======================================================================= */
   /* ADD TO CART MUTATION */
@@ -606,7 +670,10 @@ export default function ProductPage({ params }: ProductPageProps) {
   });
 
   const handleAddToCart = useCallback(() => {
-    if (!isLoggedIn) { router.push("/signup"); return; }
+    if (!isLoggedIn) {
+      router.push("/signup");
+      return;
+    }
     if (!isInStock || addToCartMutation.isPending) return;
     if (!selectedSize) {
       toastManager.add({
@@ -645,7 +712,10 @@ export default function ProductPage({ params }: ProductPageProps) {
   });
 
   const handleBuyNow = useCallback(() => {
-    if (!isLoggedIn) { router.push("/signup"); return; }
+    if (!isLoggedIn) {
+      router.push("/signup");
+      return;
+    }
     if (!isInStock || buyNowMutation.isPending) return;
     if (!selectedSize) {
       toastManager.add({
@@ -672,15 +742,32 @@ export default function ProductPage({ params }: ProductPageProps) {
           <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <ol className="flex items-center gap-2 text-[10px] sm:text-[11px] text-muted-foreground uppercase tracking-widest font-medium">
               <li>
-                <Link href="/" className="hover:text-foreground transition-colors">Home</Link>
+                <Link
+                  href="/"
+                  className="hover:text-foreground transition-colors"
+                >
+                  Home
+                </Link>
               </li>
-              <li><span className="text-muted-foreground/40">/</span></li>
               <li>
-                <Link href="/products" className="hover:text-foreground transition-colors">Shop</Link>
+                <span className="text-muted-foreground/40">/</span>
               </li>
-              <li><span className="text-muted-foreground/40">/</span></li>
+              <li>
+                <Link
+                  href="/products"
+                  className="hover:text-foreground transition-colors"
+                >
+                  Shop
+                </Link>
+              </li>
+              <li>
+                <span className="text-muted-foreground/40">/</span>
+              </li>
               <li className="hidden sm:inline-flex items-center gap-2">
-                <Link href={`/products?category=${product.category}`} className="hover:text-foreground transition-colors">
+                <Link
+                  href={`/products?category=${product.category}`}
+                  className="hover:text-foreground transition-colors"
+                >
                   {product.category}
                 </Link>
                 <span className="text-muted-foreground/40">/</span>
@@ -720,12 +807,10 @@ export default function ProductPage({ params }: ProductPageProps) {
       {!isLoading && product && (
         <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
           <div className="grid gap-10 lg:grid-cols-2 lg:gap-16 xl:gap-24">
-
             {/* ============================================================ */}
             {/* LEFT — GALLERY */}
             {/* ============================================================ */}
             <div className="lg:sticky lg:top-12 lg:self-start flex flex-col-reverse md:flex-row gap-3 sm:gap-5">
-
               {/* Thumbnails */}
               {galleryImages.length > 1 && (
                 <div className="flex md:flex-col gap-2.5 overflow-x-auto md:overflow-y-auto md:max-h-[700px] scrollbar-none snap-x snap-mandatory pb-2 md:pb-0">
@@ -737,7 +822,7 @@ export default function ProductPage({ params }: ProductPageProps) {
                         "relative h-[80px] w-[60px] md:h-[100px] md:w-[75px] shrink-0 overflow-hidden transition-all duration-300 snap-start focus:outline-none",
                         selectedImage === img
                           ? "opacity-100 ring-1 ring-foreground ring-offset-1 md:ring-offset-2"
-                          : "opacity-50 hover:opacity-100"
+                          : "opacity-50 hover:opacity-100",
                       )}
                       aria-label={`View image ${idx + 1}`}
                     >
@@ -796,14 +881,12 @@ export default function ProductPage({ params }: ProductPageProps) {
                   <ZoomIn size={18} />
                 </div>
               </div>
-
             </div>
 
             {/* ============================================================ */}
             {/* RIGHT — PRODUCT DETAILS */}
             {/* ============================================================ */}
             <div className="flex flex-col pt-2 sm:pt-0">
-
               {/* Category */}
               <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground mb-3 sm:mb-4">
                 {product.category}
@@ -840,7 +923,10 @@ export default function ProductPage({ params }: ProductPageProps) {
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-medium uppercase tracking-[0.15em] text-foreground">
-                      Colour: <span className="text-muted-foreground ml-1">{selectedVariant}</span>
+                      Colour:{" "}
+                      <span className="text-muted-foreground ml-1">
+                        {selectedVariant}
+                      </span>
                     </span>
                   </div>
                   <div className="flex flex-wrap gap-2.5 sm:gap-3">
@@ -855,7 +941,7 @@ export default function ProductPage({ params }: ProductPageProps) {
                             "relative h-14 w-10 sm:h-16 sm:w-12 overflow-hidden focus:outline-none transition-all duration-200",
                             isSelected
                               ? "ring-1 ring-foreground ring-offset-2 opacity-100"
-                              : "opacity-60 hover:opacity-100"
+                              : "opacity-60 hover:opacity-100",
                           )}
                           title={variant.color}
                           aria-label={`Select ${variant.color}`}
@@ -896,7 +982,8 @@ export default function ProductPage({ params }: ProductPageProps) {
                   <div className="grid grid-cols-4 sm:grid-cols-5 gap-2 sm:gap-3">
                     {sizeOptions.map((size) => {
                       const sizeStock =
-                        activeVariant?.size?.find((s) => s.size === size)?.stock ?? 0;
+                        activeVariant?.size?.find((s) => s.size === size)
+                          ?.stock ?? 0;
                       const outOfStock = sizeStock === 0;
 
                       return (
@@ -910,7 +997,7 @@ export default function ProductPage({ params }: ProductPageProps) {
                               ? "cursor-not-allowed border border-border/40 bg-muted/20 text-muted-foreground/40 line-through"
                               : selectedSize === size
                                 ? "bg-foreground text-background font-medium shadow-sm"
-                                : "border border-border/80 hover:border-foreground text-foreground bg-background"
+                                : "border border-border/80 hover:border-foreground text-foreground bg-background",
                           )}
                           aria-pressed={selectedSize === size}
                         >
@@ -990,31 +1077,53 @@ export default function ProductPage({ params }: ProductPageProps) {
                   <Button
                     variant="outline"
                     onClick={handleToggleWishlist}
-                    disabled={addToWishlistMutation.isPending || removeFromWishlistMutation.isPending}
+                    disabled={
+                      addToWishlistMutation.isPending ||
+                      removeFromWishlistMutation.isPending
+                    }
                     className="h-12 w-12 sm:h-14 sm:w-14 shrink-0 rounded-none border-border hover:border-foreground hover:bg-transparent transition-all p-0 flex items-center justify-center bg-background"
-                    aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
+                    aria-label={
+                      isWishlisted ? "Remove from wishlist" : "Add to wishlist"
+                    }
                   >
                     <Heart
                       className={cn(
                         "h-4 w-4 sm:h-5 sm:w-5 transition-colors",
-                        isWishlisted && "fill-rose-500 text-rose-500"
+                        isWishlisted && "fill-rose-500 text-rose-500",
                       )}
                     />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={handleShare}
+                    className="h-12 w-12 sm:h-14 sm:w-14 shrink-0 rounded-none border-border hover:border-foreground hover:bg-transparent transition-all p-0 flex items-center justify-center bg-background"
+                    aria-label="Share product"
+                  >
+                    <Share2 className="h-4 w-4 sm:h-5 sm:w-5" />
                   </Button>
                 </div>
               </div>
 
               {/* Trust Information */}
               <div className="mt-6 flex items-center gap-6 text-[10px] sm:text-xs text-muted-foreground uppercase tracking-wider font-medium">
-                <span className="flex items-center gap-1.5"><ShieldCheck className="h-4 w-4" /> 100% Authentic</span>
-                <span className="flex items-center gap-1.5"><Truck className="h-4 w-4" /> Fast Shipping</span>
+                <span className="flex items-center gap-1.5">
+                  <ShieldCheck className="h-4 w-4" /> 100% Authentic
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <Truck className="h-4 w-4" /> Fast Shipping
+                </span>
               </div>
 
               <div className="mt-10 sm:mt-12 space-y-0 border-t border-border/60">
                 <AccordionItem title="Description" defaultOpen>
                   <div className="space-y-4 text-xs sm:text-sm leading-relaxed text-muted-foreground font-light">
-                    <p>{product.description || "No description available for this product."}</p>
-                    {product.productInformation && <p>{product.productInformation}</p>}
+                    <p>
+                      {product.description ||
+                        "No description available for this product."}
+                    </p>
+                    {product.productInformation && (
+                      <p>{product.productInformation}</p>
+                    )}
                   </div>
                 </AccordionItem>
 
@@ -1029,7 +1138,9 @@ export default function ProductPage({ params }: ProductPageProps) {
                       .filter((item) => item.value)
                       .map((item) => (
                         <div key={item.label} className="grid grid-cols-3">
-                          <span className="text-muted-foreground">{item.label}</span>
+                          <span className="text-muted-foreground">
+                            {item.label}
+                          </span>
                           <span className="col-span-2">{item.value}</span>
                         </div>
                       ))}
@@ -1038,12 +1149,18 @@ export default function ProductPage({ params }: ProductPageProps) {
 
                 <AccordionItem title="Shipping & Returns">
                   <div className="space-y-4 text-xs sm:text-sm text-muted-foreground font-light pt-1">
-                    <p>Free standard shipping on all orders. Delivered within 5–7 business days.</p>
-                    <p>We do not offer refunds. Exchange is available within 7 days of delivery. Items must be unused and in original condition with tags attached.</p>
+                    <p>
+                      Free standard shipping on all orders. Delivered within 5–7
+                      business days.
+                    </p>
+                    <p>
+                      We do not offer refunds. Exchange is available within 7
+                      days of delivery. Items must be unused and in original
+                      condition with tags attached.
+                    </p>
                   </div>
                 </AccordionItem>
               </div>
-
             </div>
           </div>
 
@@ -1055,26 +1172,29 @@ export default function ProductPage({ params }: ProductPageProps) {
               <h2 className="text-2xl sm:text-3xl font-serif text-foreground tracking-tight mb-3">
                 Customer Reviews
               </h2>
-              {product.averageRating !== undefined && product.averageRating > 0 && (
-                <div className="flex items-center justify-center gap-2">
-                  <div className="flex gap-0.5">
-                    {[...Array(5)].map((_, i) => (
-                      <Star
-                        key={i}
-                        size={16}
-                        className={cn(
-                          i < Math.round(product.averageRating || 0)
-                            ? "fill-foreground text-foreground"
-                            : "text-muted-foreground/30 fill-transparent"
-                        )}
-                      />
-                    ))}
+              {product.averageRating !== undefined &&
+                product.averageRating > 0 && (
+                  <div className="flex items-center justify-center gap-2">
+                    <div className="flex gap-0.5">
+                      {[...Array(5)].map((_, i) => (
+                        <Star
+                          key={i}
+                          size={16}
+                          className={cn(
+                            i < Math.round(product.averageRating || 0)
+                              ? "fill-foreground text-foreground"
+                              : "text-muted-foreground/30 fill-transparent",
+                          )}
+                        />
+                      ))}
+                    </div>
+                    <span className="text-sm font-medium text-muted-foreground ml-1">
+                      {product.averageRating.toFixed(1)} based on{" "}
+                      {product.ratingCount || product.review?.length || 0}{" "}
+                      reviews
+                    </span>
                   </div>
-                  <span className="text-sm font-medium text-muted-foreground ml-1">
-                    {product.averageRating.toFixed(1)} based on {product.ratingCount || product.review?.length || 0} reviews
-                  </span>
-                </div>
-              )}
+                )}
             </div>
 
             <Review_04
@@ -1111,9 +1231,7 @@ export default function ProductPage({ params }: ProductPageProps) {
       )}
 
       {/* Spacer for sticky bar on mobile */}
-      {!isLoading && product && (
-        <div className="h-20 sm:hidden" />
-      )}
+      {!isLoading && product && <div className="h-20 sm:hidden" />}
 
       {/* Image Zoom Modal */}
       <ImageZoomViewer
