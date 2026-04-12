@@ -70,6 +70,64 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
-export default function Page({ params }: Props) {
-  return <ProductPage params={params} />;
+export default async function Page({ params }: Props) {
+  const { id } = await params;
+  let jsonLd: Record<string, any> | null = null;
+
+  try {
+    const res = await api.get<{ status: boolean; data?: Product }>(
+      `/product/${encodeURIComponent(id)}`,
+    );
+
+    if (res?.status && res.data) {
+      const product = res.data;
+      const images = product.variants?.flatMap((v) => v.images).filter(Boolean) || [];
+
+      jsonLd = {
+        "@context": "https://schema.org",
+        "@type": "Product",
+        name: product.name,
+        image: images.length > 0 ? images : undefined,
+        description: product.description,
+        sku: product.sku,
+        category: product.category,
+        offers: {
+          "@type": "Offer",
+          url: `${SITE_URL}/products/${id}`,
+          priceCurrency: "INR",
+          price: product.price,
+          availability: product.isActive
+            ? "https://schema.org/InStock"
+            : "https://schema.org/OutOfStock",
+          itemCondition: "https://schema.org/NewCondition",
+        },
+        brand: {
+          "@type": "Brand",
+          name: "Ethnic Elegance",
+        },
+      };
+
+      if (product.averageRating > 0 && product.ratingCount > 0) {
+        jsonLd.aggregateRating = {
+          "@type": "AggregateRating",
+          ratingValue: product.averageRating,
+          reviewCount: product.ratingCount,
+        };
+      }
+    }
+  } catch (error) {
+    console.error("Failed to fetch product for JSON-LD", error);
+  }
+
+  return (
+    <>
+      {jsonLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      )}
+      <ProductPage params={params} />
+    </>
+  );
 }

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Instagram, Facebook, Twitter } from "lucide-react";
+import { Instagram, Facebook, Youtube } from "lucide-react";
 
 const footerLinks = {
   shop: [
@@ -118,25 +118,31 @@ export function Footer() {
           </p>
           <div className="flex items-center gap-4">
             <Link
-              href="#"
+              href="https://www.instagram.com/ethnic_elegance_1110/?hl=en"
+              target="_blank"
+              rel="noopener noreferrer"
               className="text-primary-foreground/60 hover:text-primary-foreground transition-colors"
             >
               <Instagram className="h-5 w-5" />
               <span className="sr-only">Instagram</span>
             </Link>
             <Link
-              href="#"
+              href="https://m.facebook.com/?http_ref=eyJ0cyI6IjE3NzIwOTgzMDg5NjkiLCJyIjoiaHR0cHM6XC9cL3d3dy5nb29nbGUuY29tXC8ifQ%3D%3D"
+              target="_blank"
+              rel="noopener noreferrer"
               className="text-primary-foreground/60 hover:text-primary-foreground transition-colors"
             >
               <Facebook className="h-5 w-5" />
               <span className="sr-only">Facebook</span>
             </Link>
             <Link
-              href="#"
+              href="https://www.youtube.com/@EthnicElegance_1110"
+              target="_blank"
+              rel="noopener noreferrer"
               className="text-primary-foreground/60 hover:text-primary-foreground transition-colors"
             >
-              <Twitter className="h-5 w-5" />
-              <span className="sr-only">Twitter</span>
+              <Youtube className="h-5 w-5" />
+              <span className="sr-only">YouTube</span>
             </Link>
           </div>
         </div>

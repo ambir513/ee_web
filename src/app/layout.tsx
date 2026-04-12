@@ -3,6 +3,7 @@ import { Geist, Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { ToastProvider } from "@/components/ui/toast";
 import { TanstackQueryProvider } from "@/utils/tanstack-query";
+import { Analytics } from "@vercel/analytics/next"
 
 const _inter = Inter({
   subsets: ["latin"],
@@ -86,13 +87,60 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "@id": `${SITE_URL}/#website`,
+        url: SITE_URL,
+        name: "Ethnic Elegance",
+        description: "Premium Women's Ethnic Wear Online",
+        publisher: {
+          "@id": `${SITE_URL}/#organization`,
+        },
+        potentialAction: [
+          {
+            "@type": "SearchAction",
+            target: {
+              "@type": "EntryPoint",
+              urlTemplate: `${SITE_URL}/products?search={search_term_string}`,
+            },
+            "query-input": "required name=search_term_string",
+          },
+        ],
+      },
+      {
+        "@type": "Organization",
+        "@id": `${SITE_URL}/#organization`,
+        name: "Ethnic Elegance",
+        url: SITE_URL,
+        logo: {
+          "@type": "ImageObject",
+          url: `${SITE_URL}/images/logo1.png`,
+        },
+        sameAs: [
+          "https://www.instagram.com/ethnic_elegance_1110/?hl=en",
+          "https://www.youtube.com/@EthnicElegance_1110",
+        ],
+      },
+    ],
+  };
+
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      </head>
       <body
         className={`${_inter.className} ${_playfairDisplay.variable} antialiased bg-secondary`}
       >
         <TanstackQueryProvider>
           {children}
+          <Analytics />
           <ToastProvider />
         </TanstackQueryProvider>
       </body>
