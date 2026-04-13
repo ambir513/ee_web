@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Calendar,
   Home,
@@ -68,9 +70,8 @@ const items = [
   {
     name: "Settings",
     list: [
-      { title: "General", url: "#", icon: Settings },
-      { title: "Search", url: "#", icon: Search },
-      { title: "Home Page", url: "#", icon: Home },
+      { title: "General", url: "/admin/general", icon: Settings },
+      { title: "Home Page", url: "/", icon: Home },
     ],
   },
 ];

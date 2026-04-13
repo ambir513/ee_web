@@ -44,7 +44,7 @@ const UserDropdown = ({ user }: { user: any }) => {
     retry: false,
   });
 
-  const cartItems = cartData?.data || [];
+  const cartItems = Array.isArray(cartData?.data) ? cartData.data : [];
   const cartCount = cartItems.reduce((sum: number, item: any) => sum + (item.quantity || 1), 0);
 
   const handleLogout = async () => {
@@ -89,45 +89,43 @@ const UserDropdown = ({ user }: { user: any }) => {
             </div>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <Link href={"/account"}>
-            <DropdownMenuItem>
-              <User />
-              Profile
-            </DropdownMenuItem>
-          </Link>
+          <DropdownMenuItem onSelect={() => router.push("/account")}>
+            <User />
+            Profile
+          </DropdownMenuItem>
 
           {user?.role === "ADMIN" && (
-            <Link href={"/admin"}>
-              <DropdownMenuItem>
-                <ShieldUser />
-                Admin Panel
-              </DropdownMenuItem>
-            </Link>
+            <DropdownMenuItem onSelect={() => router.push("/admin")}>
+              <ShieldUser />
+              Admin Panel
+            </DropdownMenuItem>
           )}
-          <Link href={"/account#orders"}>
-            <DropdownMenuItem>
-              <ScrollText />
-              Order
-            </DropdownMenuItem>
-          </Link>
-          <Link href={"/account#cart"}>
-            <DropdownMenuItem>
-              <div className="flex justify-between w-full">
-                <p className="flex justify-center items-center gap-x-2">
-                  <BsCart />
-                  <span> My Cart </span>
-                </p>
-                {cartCount > 0 && (
-                  <Badge className="text-white">{cartCount}</Badge>
-                )}
-              </div>
-            </DropdownMenuItem>
-          </Link>
-          <DropdownMenuItem>
+
+          <DropdownMenuItem onSelect={() => router.push("/account#orders")}>
+            <ScrollText />
+            Order
+          </DropdownMenuItem>
+
+          <DropdownMenuItem onSelect={() => router.push("/account#cart")}>
+            <div className="flex justify-between items-center w-full">
+              <p className="flex justify-center items-center gap-x-2">
+                <BsCart />
+                <span> My Cart </span>
+              </p>
+              {cartCount > 0 && (
+                <Badge className="text-white h-5 flex items-center justify-center px-1.5 min-w-5">
+                  {cartCount}
+                </Badge>
+              )}
+            </div>
+          </DropdownMenuItem>
+
+          <DropdownMenuItem onSelect={() => router.push("/account#wishlist")}>
             <IoMdHeartEmpty />
             My Wishlist
           </DropdownMenuItem>
-          <DropdownMenuItem>
+
+          <DropdownMenuItem onSelect={() => router.push("/account#personal")}>
             <Settings />
             Settings
           </DropdownMenuItem>

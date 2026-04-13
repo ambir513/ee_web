@@ -255,16 +255,10 @@ export default function CreateProductCard() {
                   <SelectValue placeholder="Select design" />
                 </SelectTrigger>
                 <SelectPopup>
-                  <SelectItem value="Floral Print">Floral Print</SelectItem>
                   <SelectItem value="Ethnic Print">Ethnic Print</SelectItem>
-                  <SelectItem value="Abstract Print">Abstract Print</SelectItem>
-                  <SelectItem value="Solid">Solid</SelectItem>
-                  <SelectItem value="Checks">Checks</SelectItem>
-                  <SelectItem value="Stripes">Stripes</SelectItem>
                   <SelectItem value="Bandhani">Bandhani</SelectItem>
                   <SelectItem value="Leheriya">Leheriya</SelectItem>
                   <SelectItem value="Tie & Dye">Tie & Dye</SelectItem>
-                  <SelectItem value="Block Print">Block Print</SelectItem>
                 </SelectPopup>
               </Select>
             </FieldItem>
