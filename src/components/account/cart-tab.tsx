@@ -223,7 +223,7 @@ export function CartTab() {
   /* DERIVED DATA                                                       */
   /* ================================================================== */
 
-  const items: CartItem[] = (cartData?.data || []).filter(
+  const items: CartItem[] = (Array.isArray(cartData?.data) ? cartData.data : []).filter(
     (item: CartItem) => item.productId != null,
   );
   const addresses: AddressData[] = (addressData?.data || []).map((a: any) => a);

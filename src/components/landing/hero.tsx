@@ -112,9 +112,8 @@ export function Hero() {
               alt={b.title}
               fill
               className="object-cover object-center"
-              priority={currentBanner === b.id - 1} // or index === 0 initially
+              priority={b.id === 1}
               fetchPriority={b.id === 1 ? "high" : "auto"}
-              loading={b.id === 1 ? "eager" : "lazy"}
               quality={85}            />
             <div className="absolute inset-0 bg-gradient-to-r from-foreground/80 via-foreground/50 to-foreground/10 md:from-foreground/70 md:via-foreground/40 md:to-transparent" />
           </div>

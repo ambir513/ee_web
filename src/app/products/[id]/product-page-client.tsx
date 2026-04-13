@@ -671,7 +671,7 @@ export default function ProductPage({ params }: ProductPageProps) {
 
   const handleAddToCart = useCallback(() => {
     if (!isLoggedIn) {
-      router.push("/signup");
+      router.push("/login");
       return;
     }
     if (!isInStock || addToCartMutation.isPending) return;
@@ -713,7 +713,7 @@ export default function ProductPage({ params }: ProductPageProps) {
 
   const handleBuyNow = useCallback(() => {
     if (!isLoggedIn) {
-      router.push("/signup");
+      router.push("/login");
       return;
     }
     if (!isInStock || buyNowMutation.isPending) return;

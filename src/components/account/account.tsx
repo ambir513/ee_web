@@ -91,14 +91,16 @@ export function Account() {
     );
   }
 
-  // Show error state
+  // Redirect if not authenticated instead of showing error
   if (isError || !userData?.status) {
+    if (typeof window !== "undefined") {
+      window.location.href = "/login";
+    }
     return (
       <main className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-sm text-muted-foreground">
-            Unable to load account data. Please try again.
-          </p>
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <p className="text-sm text-muted-foreground">Redirecting...</p>
         </div>
       </main>
     );
