@@ -54,6 +54,13 @@ interface AdminOrder {
     sku?: string;
   };
   notes?: {
+    products?: Array<{
+      name?: string;
+      color?: string;
+      size?: string;
+      quantity?: number;
+      price?: number;
+    }>;
     address?: {
       city?: string;
       state?: string;
@@ -281,11 +288,23 @@ export default function OrdersListCard() {
                         <TableCell>
                           <div className="min-w-45">
                             <p className="font-medium">
-                              {order.productId?.name || "Product"}
+                              {order.notes?.products?.[0]?.name || order.productId?.name || "Product"}
                             </p>
-                            <p className="text-xs text-muted-foreground">
+                            <p className="text-xs text-muted-foreground mb-0.5">
                               SKU: {order.productId?.sku || "-"}
                             </p>
+                            {(order.notes?.products?.[0]?.color || order.notes?.products?.[0]?.size) && (
+                              <p className="text-[11px] text-muted-foreground flex gap-1.5 items-center">
+                                {order.notes.products[0].color && <span>C: {order.notes.products[0].color}</span>}
+                                {order.notes.products[0].size && <span>S: {order.notes.products[0].size}</span>}
+                                {order.notes.products[0].quantity && <span>Qty: {order.notes.products[0].quantity}</span>}
+                              </p>
+                            )}
+                            {order.notes?.products && order.notes.products.length > 1 && (
+                                <p className="text-[10px] text-primary font-medium mt-1">
+                                    +{order.notes.products.length - 1} more item(s)
+                                </p>
+                            )}
                           </div>
                         </TableCell>
                         <TableCell className="text-muted-foreground min-w-45">

@@ -441,11 +441,16 @@ function TrackingDetail({
         order.statusHistory?.map((s) => s.status) || [],
     );
 
+    const productColor = order.notes?.products?.[0]?.color || "";
+    const matchedVariant = productColor
+        ? order.productId?.variants?.find((v: any) => v.color === productColor)
+        : null;
     const productImage =
-        order.productId?.variants?.[0]?.images?.[0] || null;
+        matchedVariant?.images?.[0] ||
+        order.productId?.variants?.[0]?.images?.[0] ||
+        null;
     const productName =
         order.notes?.products?.[0]?.name || order.productId?.name || "Product";
-    const productColor = order.notes?.products?.[0]?.color || "";
     const productSize = order.notes?.products?.[0]?.size || "";
     const address = order.notes?.address;
 

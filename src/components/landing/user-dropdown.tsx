@@ -38,14 +38,16 @@ const UserDropdown = ({ user }: { user: any }) => {
   const { data: cartData } = useQuery({
     queryKey: ["getCart"],
     queryFn: () => api.get("/addtocart/all", { queryClient }),
-    staleTime: 5 * 60 * 1000,
-    refetchOnMount: false,
-    refetchOnWindowFocus: false,
+    staleTime: 2 * 60 * 1000,
     retry: false,
   });
 
-  const cartItems = Array.isArray(cartData?.data) ? cartData.data : [];
-  const cartCount = cartItems.reduce((sum: number, item: any) => sum + (item.quantity || 1), 0);
+  const cartItems =
+    cartData?.status && Array.isArray(cartData?.data) ? cartData.data : [];
+  const cartCount = cartItems.reduce(
+    (sum: number, item: any) => sum + (item.quantity || 1),
+    0,
+  );
 
   const handleLogout = async () => {
     setIsLoading(true);
@@ -89,25 +91,34 @@ const UserDropdown = ({ user }: { user: any }) => {
             </div>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onSelect={() => router.push("/account")}>
-            <User />
-            Profile
+          <DropdownMenuItem render={
+            <Link href="/account" className="w-full flex items-center gap-x-1.5 cursor-pointer">
+              <User />
+              Profile
+            </Link>
+          }>
           </DropdownMenuItem>
 
           {user?.role === "ADMIN" && (
-            <DropdownMenuItem onSelect={() => router.push("/admin")}>
-              <ShieldUser />
-              Admin Panel
+            <DropdownMenuItem render={
+              <Link href="/admin" className="w-full flex items-center gap-x-1.5 cursor-pointer">
+                <ShieldUser />
+                Admin Panel
+              </Link>
+            }>
             </DropdownMenuItem>
           )}
 
-          <DropdownMenuItem onSelect={() => router.push("/account#orders")}>
-            <ScrollText />
-            Order
+          <DropdownMenuItem render={
+            <Link href="/account#orders" className="w-full flex items-center gap-x-1.5 cursor-pointer">
+              <ScrollText />
+              Order
+            </Link>
+          }>
           </DropdownMenuItem>
 
-          <DropdownMenuItem onSelect={() => router.push("/account#cart")}>
-            <div className="flex justify-between items-center w-full">
+          <DropdownMenuItem render={
+            <Link href="/account#cart" className="flex justify-between items-center w-full cursor-pointer">
               <p className="flex justify-center items-center gap-x-2">
                 <BsCart />
                 <span> My Cart </span>
@@ -117,17 +128,27 @@ const UserDropdown = ({ user }: { user: any }) => {
                   {cartCount}
                 </Badge>
               )}
-            </div>
+            </Link>
+          }>
+
           </DropdownMenuItem>
 
-          <DropdownMenuItem onSelect={() => router.push("/account#wishlist")}>
-            <IoMdHeartEmpty />
-            My Wishlist
+          <DropdownMenuItem render={
+            <Link href="/account#wishlist" className="w-full flex items-center gap-x-1.5 cursor-pointer">
+              <IoMdHeartEmpty />
+              My Wishlist
+            </Link>
+          }>
+
           </DropdownMenuItem>
 
-          <DropdownMenuItem onSelect={() => router.push("/account#personal")}>
-            <Settings />
-            Settings
+          <DropdownMenuItem render={
+            <Link href="/account#personal" className="w-full flex items-center gap-x-1.5 cursor-pointer">
+              <Settings />
+              Settings
+            </Link>
+          }>
+
           </DropdownMenuItem>
           <DropdownMenuItem>
             <HelpCircle />
@@ -137,7 +158,6 @@ const UserDropdown = ({ user }: { user: any }) => {
           <DropdownMenuItem
             variant={isLoading ? "default" : "destructive"}
             onClick={handleLogout}
-            onSelect={(e) => e.preventDefault()}
           >
             <div className="relative">
               <p
