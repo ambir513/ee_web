@@ -1,11 +1,11 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Field, FieldLabel, FieldDescription } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import {
   Sheet,
-  SheetClose,
   SheetDescription,
   SheetFooter,
   SheetHeader,
@@ -15,7 +15,6 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { ImageUpload } from "./image-uploader";
-import { useState } from "react";
 import { api } from "@/lib/api";
 import { Loader2, Plus, Trash2 } from "lucide-react";
 
@@ -25,33 +24,85 @@ interface SizeStock {
 }
 
 interface VariantData {
+  _id?: string;
   color: string;
   sizes: SizeStock[];
   images: string[];
 }
 
+export interface VariantSheetVariant {
+  _id?: string;
+  color: string;
+  size: Array<{ size: string; stock: number }>;
+  images: string[];
+}
+
+const createEmptyVariant = (
+  variant?: VariantSheetVariant | null,
+): VariantData => {
+  if (!variant) {
+    return {
+      color: "",
+      sizes: [{ size: "", stock: "" }],
+      images: [],
+    };
+  }
+
+  return {
+    _id: variant._id,
+    color: variant.color ?? "",
+    sizes:
+      variant.size?.length > 0
+        ? variant.size.map((item) => ({
+            size: item.size ?? "",
+            stock: String(item.stock ?? ""),
+          }))
+        : [{ size: "", stock: "" }],
+    images: variant.images ?? [],
+  };
+};
+
 export function VariantSheet({
   isOpen,
   setIsOpen,
   productId,
+  variant,
+  showTrigger = true,
+  triggerLabel,
+  onSaved,
 }: {
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
   productId?: string;
+  variant?: VariantSheetVariant | null;
+  showTrigger?: boolean;
+  triggerLabel?: string;
+  onSaved?: (variants: VariantSheetVariant[]) => void;
 }) {
-  const [variantData, setVariantData] = useState<VariantData>({
-    color: "",
-    sizes: [{ size: "", stock: "" }],
-    images: [],
-  });
+  const [variantData, setVariantData] = useState<VariantData>(() =>
+    createEmptyVariant(variant),
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleInputChange = (field: keyof VariantData, value: any) => {
+  const isEditing = Boolean(variantData._id);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    setVariantData(createEmptyVariant(variant));
+    setError(null);
+  }, [isOpen, variant]);
+
+  const handleInputChange = (field: keyof VariantData, value: string) => {
     setVariantData((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleSizeChange = (index: number, field: keyof SizeStock, value: string) => {
+  const handleSizeChange = (
+    index: number,
+    field: keyof SizeStock,
+    value: string,
+  ) => {
     setVariantData((prev) => {
       const newSizes = [...prev.sizes];
       newSizes[index] = { ...newSizes[index], [field]: value };
@@ -99,7 +150,7 @@ export function VariantSheet({
     }
 
     const validSizes = variantData.sizes.filter(
-      (s) => s.size.trim() && s.stock.trim()
+      (s) => s.size.trim() && s.stock.trim(),
     );
 
     if (validSizes.length === 0) {
@@ -119,26 +170,28 @@ export function VariantSheet({
         })),
       };
 
-      const response = await api.post(
-        `/admin/product/variant/add/${productId}`,
-        payload
-      );
+      const response =
+        isEditing && variantData._id
+          ? await api.patch(
+              `/admin/product/variant/edit/${productId}/${variantData._id}`,
+              payload,
+            )
+          : await api.post(`/admin/product/variant/add/${productId}`, payload);
 
       if (!response?.status) {
-        setError(response?.message || "Failed to add variant");
+        setError(response?.message || "Failed to save variant");
         return;
       }
 
-      // Reset form and close sheet on success
-      setVariantData({
-        color: "",
-        sizes: [{ size: "", stock: "" }],
-        images: [],
-      });
+      if (Array.isArray(response.data?.variants)) {
+        onSaved?.(response.data.variants as VariantSheetVariant[]);
+      }
+
+      setVariantData(createEmptyVariant(null));
       setIsOpen(false);
     } catch (err) {
-      console.error("Error adding variant:", err);
-      setError("Failed to add variant. Please try again.");
+      console.error("Error saving variant:", err);
+      setError("Failed to save variant. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -146,28 +199,33 @@ export function VariantSheet({
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
-      <SheetTrigger
-        render={
-          <Button
-            variant="default"
-            className="flex-1"
-            onClick={() => setIsOpen(true)}
-          />
-        }
-      >
-        Add Variants
-      </SheetTrigger>
+      {showTrigger && (
+        <SheetTrigger
+          render={
+            <Button
+              variant="default"
+              className="flex-1"
+              onClick={() => setIsOpen(true)}
+              type="button"
+            />
+          }
+        >
+          {triggerLabel || "Add Variants"}
+        </SheetTrigger>
+      )}
       <SheetPopup variant="inset" className="max-w-3xl">
         <form className="h-full flex flex-col gap-0" onSubmit={handleSubmit}>
           <SheetHeader>
-            <SheetTitle>Add Product Variant</SheetTitle>
+            <SheetTitle>
+              {isEditing ? "Edit Product Variant" : "Add Product Variant"}
+            </SheetTitle>
             <SheetDescription>
-              Add color variants with sizes, stock, and images. Each variant
-              represents a different color option.
+              {isEditing
+                ? "Update color, sizes, stock, and images for this variant."
+                : "Add color variants with sizes, stock, and images. Each variant represents a different color option."}
             </SheetDescription>
           </SheetHeader>
           <SheetPanel className="grid gap-5 overflow-y-auto">
-            {/* Color Input */}
             <Field>
               <FieldLabel>Color Name</FieldLabel>
               <Input
@@ -180,7 +238,6 @@ export function VariantSheet({
               </FieldDescription>
             </Field>
 
-            {/* Size & Stock Inputs */}
             <div className="space-y-3">
               <Field>
                 <FieldLabel>Sizes & Stock</FieldLabel>
@@ -231,11 +288,11 @@ export function VariantSheet({
               </Button>
             </div>
 
-            {/* Image Upload */}
             <Field>
               <FieldLabel>Variant Images</FieldLabel>
               <div className="mt-2">
                 <ImageUpload
+                  key={variantData._id ?? "new"}
                   onImagesChange={handleImagesChange}
                   maxImages={5}
                   initialImages={variantData.images}
@@ -246,7 +303,6 @@ export function VariantSheet({
               </FieldDescription>
             </Field>
 
-            {/* Error Message */}
             {error && (
               <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
                 <p className="text-sm text-destructive">{error}</p>
@@ -268,6 +324,8 @@ export function VariantSheet({
                   <Loader2 className="mr-2 size-4 animate-spin" />
                   Saving...
                 </>
+              ) : isEditing ? (
+                "Update Variant"
               ) : (
                 "Save Variant"
               )}

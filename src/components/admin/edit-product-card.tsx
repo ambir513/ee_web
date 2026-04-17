@@ -27,10 +27,17 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { VariantSheet } from "./variant-sheet";
+import { VariantSheet, type VariantSheetVariant } from "./variant-sheet";
 import { api } from "@/lib/api";
 import { ImageUpload } from "./image-uploader";
-import { Loader2, CheckCircle2, ArrowLeft, Package } from "lucide-react";
+import {
+  Loader2,
+  CheckCircle2,
+  ArrowLeft,
+  Package,
+  Plus,
+  Pencil,
+} from "lucide-react";
 
 interface ProductFormData {
   name: string;
@@ -61,6 +68,7 @@ interface Product {
   label?: string;
   sku?: string;
   images?: string[];
+  variants?: VariantSheetVariant[];
 }
 
 interface EditProductCardProps {
@@ -87,7 +95,10 @@ export default function EditProductCard({ productId }: EditProductCardProps) {
   const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [fetchError, setFetchError] = useState<string | null>(null);
-  const [isOpen, setIsOpen] = useState(false);
+  const [variants, setVariants] = useState<VariantSheetVariant[]>([]);
+  const [selectedVariant, setSelectedVariant] =
+    useState<VariantSheetVariant | null>(null);
+  const [variantSheetOpen, setVariantSheetOpen] = useState(false);
 
   const fetchProduct = useCallback(async () => {
     setIsFetching(true);
@@ -117,6 +128,7 @@ export default function EditProductCard({ productId }: EditProductCardProps) {
         sku: product.sku ?? "",
         images: product.images ?? [],
       });
+      setVariants(product.variants ?? []);
     } catch (err) {
       console.error("Error fetching product:", err);
       setFetchError("Failed to load product");
@@ -132,6 +144,91 @@ export default function EditProductCard({ productId }: EditProductCardProps) {
   const handleImagesChange = (images: string[]) => {
     setData((prev) => ({ ...prev, images }));
   };
+
+  const openVariantSheet = (variant?: VariantSheetVariant | null) => {
+    setSelectedVariant(variant ?? null);
+    setVariantSheetOpen(true);
+  };
+
+  const handleVariantSaved = (nextVariants: VariantSheetVariant[]) => {
+    setVariants(nextVariants);
+  };
+
+  const variantManager = (
+    <Card className="border-dashed shadow-none">
+      <CardHeader className="space-y-2 pb-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <CardTitle className="text-lg font-semibold">Variants</CardTitle>
+            <CardDescription>
+              Edit existing color variants or add new ones for this product.
+            </CardDescription>
+          </div>
+          <Button type="button" onClick={() => openVariantSheet()}>
+            <Plus className="mr-2 size-4" />
+            Add Variant
+          </Button>
+        </div>
+      </CardHeader>
+      <CardPanel className="space-y-3">
+        {variants.length === 0 ? (
+          <div className="rounded-lg border border-dashed p-6 text-center">
+            <p className="font-medium">No variants yet</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Add the first color variant to make this product shoppable.
+            </p>
+            <Button
+              type="button"
+              className="mt-4"
+              onClick={() => openVariantSheet()}
+            >
+              <Plus className="mr-2 size-4" />
+              Add First Variant
+            </Button>
+          </div>
+        ) : (
+          variants.map((variant) => (
+            <div
+              key={variant._id || variant.color}
+              className="flex flex-col gap-4 rounded-lg border p-4 sm:flex-row sm:items-center sm:justify-between"
+            >
+              <div className="space-y-2">
+                <div className="flex flex-wrap items-center gap-2">
+                  <p className="font-medium">{variant.color}</p>
+                  <span className="text-xs text-muted-foreground">
+                    {variant.size.length} size
+                    {variant.size.length === 1 ? "" : "s"}
+                  </span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {variant.size.map((sizeItem) => (
+                    <span
+                      key={`${variant._id || variant.color}-${sizeItem.size}`}
+                      className="rounded-full bg-muted px-2.5 py-1 text-xs text-muted-foreground"
+                    >
+                      {sizeItem.size} · {sizeItem.stock} stock
+                    </span>
+                  ))}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {variant.images.length} image
+                  {variant.images.length === 1 ? "" : "s"}
+                </p>
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => openVariantSheet(variant)}
+              >
+                <Pencil className="mr-2 size-4" />
+                Edit Variant
+              </Button>
+            </div>
+          ))
+        )}
+      </CardPanel>
+    </Card>
+  );
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -156,7 +253,7 @@ export default function EditProductCard({ productId }: EditProductCardProps) {
 
       const response = await api.patch(
         `/admin/product/edit/${productId}`,
-        payload
+        payload,
       );
 
       if (!response?.status) {
@@ -233,9 +330,15 @@ export default function EditProductCard({ productId }: EditProductCardProps) {
                 </p>
               </div>
               <div className="text-sm space-y-1">
-                <p><strong>Name:</strong> {data.name}</p>
-                <p><strong>SKU:</strong> {data.sku}</p>
-                <p><strong>Price:</strong> ₹{data.price}</p>
+                <p>
+                  <strong>Name:</strong> {data.name}
+                </p>
+                <p>
+                  <strong>SKU:</strong> {data.sku}
+                </p>
+                <p>
+                  <strong>Price:</strong> ₹{data.price}
+                </p>
               </div>
             </div>
             <div className="flex gap-3 flex-wrap">
@@ -250,12 +353,16 @@ export default function EditProductCard({ productId }: EditProductCardProps) {
               <Link href="/admin/product">
                 <Button variant="outline">Back to Products</Button>
               </Link>
-              <VariantSheet
-                isOpen={isOpen}
-                setIsOpen={setIsOpen}
-                productId={productId}
-              />
             </div>
+            {variantManager}
+            <VariantSheet
+              isOpen={variantSheetOpen}
+              setIsOpen={setVariantSheetOpen}
+              productId={productId}
+              variant={selectedVariant}
+              showTrigger={false}
+              onSaved={handleVariantSaved}
+            />
           </div>
         </CardPanel>
       </Card>
@@ -276,9 +383,7 @@ export default function EditProductCard({ productId }: EditProductCardProps) {
               <Package className="size-6" />
               Edit Product
             </CardTitle>
-            <CardDescription>
-              Update product details below.
-            </CardDescription>
+            <CardDescription>Update product details below.</CardDescription>
           </div>
         </div>
       </CardHeader>
@@ -295,7 +400,8 @@ export default function EditProductCard({ productId }: EditProductCardProps) {
                 />
               </FieldItem>
               <FieldDescription>
-                Upload up to 5 product images. First image will be the main display.
+                Upload up to 5 product images. First image will be the main
+                display.
               </FieldDescription>
             </Field>
           </div>
@@ -306,7 +412,9 @@ export default function EditProductCard({ productId }: EditProductCardProps) {
               <Select
                 name="category"
                 value={data.category}
-                onValueChange={(value) => value && setData({ ...data, category: value })}
+                onValueChange={(value) =>
+                  value && setData({ ...data, category: value })
+                }
               >
                 <SelectTrigger aria-label="Category">
                   <SelectValue placeholder="Select category" />
@@ -333,9 +441,7 @@ export default function EditProductCard({ productId }: EditProductCardProps) {
                 }
               />
             </FieldItem>
-            <FieldDescription>
-              E.g., Kurta, Shirt, Dress, etc.
-            </FieldDescription>
+            <FieldDescription>E.g., Kurta, Shirt, Dress, etc.</FieldDescription>
           </Field>
 
           <Field>
@@ -344,7 +450,9 @@ export default function EditProductCard({ productId }: EditProductCardProps) {
               <Select
                 name="design"
                 value={data.design}
-                onValueChange={(value) => value && setData({ ...data, design: value })}
+                onValueChange={(value) =>
+                  value && setData({ ...data, design: value })
+                }
               >
                 <SelectTrigger aria-label="Design">
                   <SelectValue placeholder="Select design" />
@@ -402,7 +510,7 @@ export default function EditProductCard({ productId }: EditProductCardProps) {
                 name="description"
                 placeholder="Elegant and comfortable kurta set..."
                 value={data.description}
-                className="w-full min-h-[100px]"
+                className="w-full min-h-25"
                 onChange={(e) =>
                   setData({ ...data, description: e.target.value })
                 }
@@ -420,7 +528,7 @@ export default function EditProductCard({ productId }: EditProductCardProps) {
                 name="productInformation"
                 placeholder="Material, Care, Fit..."
                 value={data.productInformation}
-                className="min-h-[80px]"
+                className="min-h-20"
                 onChange={(e) =>
                   setData({ ...data, productInformation: e.target.value })
                 }
@@ -493,6 +601,8 @@ export default function EditProductCard({ productId }: EditProductCardProps) {
             </div>
           </Field>
 
+          <div className="sm:col-span-2">{variantManager}</div>
+
           {error && (
             <div className="sm:col-span-2 p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
               <p className="text-sm text-destructive">{error}</p>
@@ -512,6 +622,14 @@ export default function EditProductCard({ productId }: EditProductCardProps) {
             </Button>
           </div>
         </Form>
+        <VariantSheet
+          isOpen={variantSheetOpen}
+          setIsOpen={setVariantSheetOpen}
+          productId={productId}
+          variant={selectedVariant}
+          showTrigger={false}
+          onSaved={handleVariantSaved}
+        />
       </CardPanel>
     </Card>
   );

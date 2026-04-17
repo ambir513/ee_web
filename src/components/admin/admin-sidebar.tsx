@@ -2,11 +2,11 @@
 
 import {
   Calendar,
+  LayoutDashboard,
   Home,
   ImagePlus,
   Inbox,
   List,
-  Search,
   Settings,
 } from "lucide-react";
 import {
@@ -22,6 +22,16 @@ import {
 import Link from "next/link";
 
 const items = [
+  {
+    name: "Dashboard",
+    list: [
+      {
+        title: "Overview",
+        url: "/admin",
+        icon: LayoutDashboard,
+      },
+    ],
+  },
   {
     name: "Products",
     list: [
@@ -41,14 +51,9 @@ const items = [
     name: "Orders",
     list: [
       {
-        title: "Orders List",
+        title: "Orders List & status",
         url: "/admin/orders",
         icon: Inbox,
-      },
-      {
-        title: "Orders Status",
-        url: "/admin/orders",
-        icon: Calendar,
       },
     ],
   },

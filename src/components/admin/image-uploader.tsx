@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -39,6 +39,11 @@ export function ImageUpload({
   const [uploadedUrls, setUploadedUrls] = useState<string[]>(initialImages);
   const [errors, setErrors] = useState<string[]>([]);
   const [isDragging, setIsDragging] = useState(false);
+
+  useEffect(() => {
+    setUploadedUrls(initialImages);
+    setErrors([]);
+  }, [initialImages]);
 
   /* --------------------------------------------------
    * VALIDATION
@@ -96,7 +101,10 @@ export function ImageUpload({
     formData.append("timestamp", String(signature.timestamp));
     formData.append("folder", "products");
     formData.append("signature", signature.signature);
-    formData.append("api_key", process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY || "142188283175534");
+    formData.append(
+      "api_key",
+      process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY || "142188283175534",
+    );
 
     try {
       const response = await fetch(
@@ -124,7 +132,8 @@ export function ImageUpload({
    * -------------------------------------------------- */
   const addImages = useCallback(
     async (files: FileList) => {
-      const remainingSlots = maxImages - uploadedUrls.length - imageFiles.length;
+      const remainingSlots =
+        maxImages - uploadedUrls.length - imageFiles.length;
       if (remainingSlots <= 0) {
         setErrors([`Maximum ${maxImages} images allowed`]);
         return;
@@ -180,7 +189,9 @@ export function ImageUpload({
         });
 
         const results = await Promise.all(uploadPromises);
-        const successfulUrls = results.filter((url): url is string => url !== null);
+        const successfulUrls = results.filter(
+          (url): url is string => url !== null,
+        );
 
         if (successfulUrls.length > 0) {
           const newUrls = [...uploadedUrls, ...successfulUrls];
@@ -199,7 +210,11 @@ export function ImageUpload({
         setImageFiles((prev) =>
           prev.map((img) =>
             valid.some((v) => v.id === img.id)
-              ? { ...img, status: "error", error: "Failed to initialize upload" }
+              ? {
+                  ...img,
+                  status: "error",
+                  error: "Failed to initialize upload",
+                }
               : img,
           ),
         );
@@ -233,7 +248,7 @@ export function ImageUpload({
               <img
                 src={url}
                 alt={`Uploaded ${index + 1}`}
-                className="h-[120px] w-full object-cover rounded-lg border border-border"
+                className="h-30 w-full object-cover rounded-lg border border-border"
               />
               <button
                 type="button"
@@ -259,7 +274,7 @@ export function ImageUpload({
                 src={img.preview}
                 alt="Uploading"
                 className={cn(
-                  "h-[120px] w-full object-cover rounded-lg border",
+                  "h-30 w-full object-cover rounded-lg border",
                   img.status === "error"
                     ? "border-destructive opacity-50"
                     : "border-border",
@@ -280,7 +295,10 @@ export function ImageUpload({
                 </button>
               )}
               {img.status === "uploading" && (
-                <Progress value={img.progress} className="absolute bottom-2 left-2 right-2 h-1" />
+                <Progress
+                  value={img.progress}
+                  className="absolute bottom-2 left-2 right-2 h-1"
+                />
               )}
             </div>
           ))}
@@ -322,8 +340,8 @@ export function ImageUpload({
               Drag & drop images or click to browse
             </p>
             <p className="text-xs text-muted-foreground/70">
-              {uploadedUrls.length + imageFiles.length}/{maxImages} images •
-              Max 10MB per file
+              {uploadedUrls.length + imageFiles.length}/{maxImages} images • Max
+              10MB per file
             </p>
           </CardContent>
         </Card>

@@ -1,5 +1,5 @@
-import React from "react";
+import AdminDashboardCard from "@/components/admin/admin-dashboard-card";
 
 export default function Page() {
-  return <div>page</div>;
+  return <AdminDashboardCard />;
 }
