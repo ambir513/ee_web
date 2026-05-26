@@ -31,11 +31,12 @@ import UserDropdown from "./user-dropdown";
 
 const categories = [
   { title: "Ethnic Wear", href: "/products?category=Ethnic+Wear", id: "c1" },
-  { title: "Dress Material", href: "/products?category=Dress+Material", id: "c2" },
-  { title: "Sarees", href: "/products?category=Sarees", id: "c3" },
-  { title: "Lehengas", href: "/products?category=Lehengas", id: "c4" },
-  { title: "Dupattas", href: "/products?category=Dupattas", id: "c5" },
-  { title: "All Products", href: "/products", id: "c6" },
+  {
+    title: "Dress Material",
+    href: "/products?category=Dress+Material",
+    id: "c2",
+  },
+  { title: "All Products", href: "/products", id: "c3" },
 ];
 
 export function Header() {
