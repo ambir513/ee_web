@@ -68,16 +68,9 @@ const CATEGORIES = [
 
 const DESIGNS = [
   { value: "", label: "All Designs" },
-  { value: "Floral Print", label: "Floral Print" },
   { value: "Ethnic Print", label: "Ethnic Print" },
-  { value: "Abstract Print", label: "Abstract Print" },
   { value: "Solid", label: "Solid" },
-  { value: "Checks", label: "Checks" },
-  { value: "Stripes", label: "Stripes" },
   { value: "Bandhani", label: "Bandhani" },
-  { value: "Leheriya", label: "Leheriya" },
-  { value: "Tie & Dye", label: "Tie & Dye" },
-  { value: "Block Print", label: "Block Print" },
 ];
 
 const RATINGS = [
