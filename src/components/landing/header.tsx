@@ -400,7 +400,7 @@ export function Header() {
               )}
 
               <Link
-                href={data?.status ? "/account#cart" : "/login"}
+                href={data?.status ? "/account#cart" : "/login?callbackUrl=%2Faccount%23cart"}
                 className="relative inline-flex h-9 w-9 items-center justify-center rounded-full border bg-background hover:bg-accent transition-colors"
                 aria-label="View shopping bag"
               >

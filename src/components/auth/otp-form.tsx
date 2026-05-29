@@ -13,24 +13,29 @@ import Logo from "@/utils/logo";
 import { api } from "@/lib/api";
 import { toastManager } from "../ui/toast";
 import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
+
+interface OTPFormProps {
+  className?: string;
+  email: string;
+  name?: string;
+}
 
 export function OTPForm({
   className,
+  email,
+  name,
   ...props
-}: {
-  className?: string;
-} & React.ComponentProps<"div">) {
+}: OTPFormProps & Omit<React.ComponentProps<"div">, "email">) {
   const [otp, setOtp] = useState("");
-  const route = useRouter()
-  const data = JSON.parse(localStorage.getItem("User") || "null");
-  const [message, setMessage] = useState<{ status: boolean; message: string }>({
-    status: true,
-    message: "",
-  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isResending, setIsResending] = useState(false);
+  const router = useRouter();
+  const queryClient = useQueryClient();
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log(data);
+
     if (otp.length < 6) {
       toastManager.add({
         type: "error",
@@ -38,47 +43,67 @@ export function OTPForm({
       });
       return;
     }
-    const res = await api.post("/auth/verify-email", {
-      email: data?.email,
-      code: otp,
-    });
-    console.log(res);
-    if (res.status) {
-      localStorage.removeItem("User");
-      toastManager.add({
-        type: "success",
-        title: res.message,
+
+    setIsSubmitting(true);
+    try {
+      const res = await api.post("/auth/verify-email", {
+        email,
+        code: otp,
       });
-      route.push("/")
-    } else {
-      setOtp("");
+
+      if (res.status) {
+        toastManager.add({
+          type: "success",
+          title: res.message,
+        });
+        // Invalidate user query so account syncs immediately
+        await queryClient.invalidateQueries({ queryKey: ["getUser"] });
+        router.push("/");
+      } else {
+        setOtp("");
+        toastManager.add({
+          type: "error",
+          title: res.message,
+        });
+      }
+    } catch {
       toastManager.add({
         type: "error",
-        title: res.message,
+        title: "Something went wrong. Please try again.",
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const reSendOTPSubmit = async () => {
-    // :) sign up route to resend otp, haaa!!!
-    const res = await api.post("/auth/sign-up", {
-      name: data?.name,
-      email: data?.email,
-      password: data?.password,
-    });
-    console.log(res);
-    if (res.status) {
-      setOtp("");
-      toastManager.add({
-        type: "success",
-        title: "OTP resent successfully",
+    setIsResending(true);
+    try {
+      const res = await api.post("/auth/resend-otp", {
+        name: name || "",
+        email,
+        password: "",
       });
-    } else {
-      setOtp("");
+
+      if (res.status) {
+        setOtp("");
+        toastManager.add({
+          type: "success",
+          title: "OTP resent successfully",
+        });
+      } else {
+        toastManager.add({
+          type: "error",
+          title: res.message,
+        });
+      }
+    } catch {
       toastManager.add({
         type: "error",
-        title: res.message,
+        title: "Failed to resend OTP. Please try again.",
       });
+    } finally {
+      setIsResending(false);
     }
   };
 
@@ -94,7 +119,7 @@ export function OTPForm({
         <div className="flex flex-col items-center gap-1 text-center">
           <h1 className="text-2xl font-bold">Enter verification code</h1>
           <p className="text-muted-foreground text-sm text-balance">
-            We sent a 6-digit code to your email.
+            We sent a 6-digit code to <strong>{email}</strong>
           </p>
         </div>
         <Field>
@@ -127,8 +152,8 @@ export function OTPForm({
             Enter the 6-digit code sent to your email.
           </FieldDescription>
         </Field>
-        <Button type="submit" className="w-[250px]">
-          Verify
+        <Button type="submit" className="w-[250px]" disabled={isSubmitting}>
+          {isSubmitting ? "Verifying..." : "Verify"}
         </Button>
         <Field>
           <FieldDescription className="text-center text-sm">
@@ -138,8 +163,9 @@ export function OTPForm({
               variant={"outline"}
               size={"xs"}
               onClick={reSendOTPSubmit}
+              disabled={isResending}
             >
-              Resend
+              {isResending ? "Sending..." : "Resend"}
             </Button>
           </FieldDescription>
         </Field>

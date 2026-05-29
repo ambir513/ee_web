@@ -13,6 +13,7 @@ import { api } from "@/lib/api";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toastManager } from "@/components/ui/toast";
 import type { Product as ApiProduct } from "@/types/product";
+import { useAuthRedirect } from "@/hooks/use-auth-redirect";
 import {
   Star,
   X,
@@ -372,8 +373,7 @@ export default function ProductPage({ params }: ProductPageProps) {
   const [isImageOpen, setIsImageOpen] = useState(false);
   const queryClient = useQueryClient();
   const router = useRouter();
-
-  // Check if user is logged in
+  const redirectToLogin = useAuthRedirect();
   const { data: userData } = useQuery({
     queryKey: ["getUser"],
     queryFn: () => api.get("/account/me", { queryClient }),
@@ -590,7 +590,7 @@ export default function ProductPage({ params }: ProductPageProps) {
 
   const handleToggleWishlist = useCallback(() => {
     if (!isLoggedIn) {
-      router.push("/login");
+      redirectToLogin();
       return;
     }
     if (addToWishlistMutation.isPending || removeFromWishlistMutation.isPending)
@@ -605,7 +605,7 @@ export default function ProductPage({ params }: ProductPageProps) {
     isWishlisted,
     addToWishlistMutation,
     removeFromWishlistMutation,
-    router,
+    redirectToLogin,
   ]);
 
   const handleShare = useCallback(async () => {
@@ -671,7 +671,7 @@ export default function ProductPage({ params }: ProductPageProps) {
 
   const handleAddToCart = useCallback(() => {
     if (!isLoggedIn) {
-      router.push("/login");
+      redirectToLogin();
       return;
     }
     if (!isInStock || addToCartMutation.isPending) return;
@@ -684,7 +684,7 @@ export default function ProductPage({ params }: ProductPageProps) {
       return;
     }
     addToCartMutation.mutate();
-  }, [isLoggedIn, isInStock, addToCartMutation, selectedSize, router]);
+  }, [isLoggedIn, isInStock, addToCartMutation, selectedSize, redirectToLogin]);
 
   const buyNowMutation = useMutation({
     mutationFn: () =>
@@ -713,7 +713,7 @@ export default function ProductPage({ params }: ProductPageProps) {
 
   const handleBuyNow = useCallback(() => {
     if (!isLoggedIn) {
-      router.push("/login");
+      redirectToLogin();
       return;
     }
     if (!isInStock || buyNowMutation.isPending) return;
@@ -726,7 +726,7 @@ export default function ProductPage({ params }: ProductPageProps) {
       return;
     }
     buyNowMutation.mutate();
-  }, [isLoggedIn, isInStock, buyNowMutation, selectedSize, router]);
+  }, [isLoggedIn, isInStock, buyNowMutation, selectedSize, redirectToLogin]);
 
   /* ======================================================================= */
   /* RENDER */

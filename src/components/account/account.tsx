@@ -94,7 +94,8 @@ export function Account() {
   // Redirect if not authenticated instead of showing error
   if (isError || !userData?.status) {
     if (typeof window !== "undefined") {
-      window.location.href = "/login";
+      const callbackUrl = encodeURIComponent(window.location.pathname);
+      window.location.href = `/login?callbackUrl=${callbackUrl}`;
     }
     return (
       <main className="min-h-screen bg-background flex items-center justify-center">
