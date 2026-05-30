@@ -1,20 +1,25 @@
 import { cookies } from "next/headers";
-import jwt from "jsonwebtoken";
+import { jwtVerify } from "jose";
 
-const JWT_KEY = process.env.NEXT_PUBLIC_JWT_SECRET! || "";
+const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || "");
 
-export const getUser = async (): Promise<any> => {
+interface UserPayload {
+  _id: string;
+  email: string;
+  role: string;
+}
+
+export const getUser = async (): Promise<UserPayload | null> => {
   const token = (await cookies()).get("token")?.value;
 
   if (!token) {
     return null;
   }
 
-  const user = jwt.verify(token, JWT_KEY);
-
-  if (!user) {
+  try {
+    const { payload } = await jwtVerify(token, JWT_SECRET);
+    return payload as unknown as UserPayload;
+  } catch {
     return null;
   }
-
-  return user;
 };

@@ -11,7 +11,7 @@ import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import Logo from "@/utils/logo";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { toastManager } from "../ui/toast";
 import { api } from "@/lib/api";
 import { useQueryClient } from "@tanstack/react-query";
@@ -21,11 +21,30 @@ type Schema = z.infer<typeof LoginSchema>;
 export function LoginForm({ className, ...props }: { className?: string }) {
   const [showPassword, setShowPassword] = useState(false);
   const route = useRouter();
+  const searchParams = useSearchParams();
   const queryClient = useQueryClient();
   const [message, setMessage] = useState<{ status: boolean; message: string }>({
     status: true,
     message: "",
   });
+
+  /**
+   * Get the safe redirect URL from callbackUrl search param.
+   * Only allows relative paths to prevent open redirect attacks.
+   */
+  function getRedirectUrl(): string {
+    const callbackUrl = searchParams.get("callbackUrl");
+
+    if (!callbackUrl) return "/";
+
+    // Only allow relative paths (must start with /)
+    // Block protocol-relative URLs (//evil.com) and absolute URLs
+    if (!callbackUrl.startsWith("/") || callbackUrl.startsWith("//")) {
+      return "/";
+    }
+
+    return callbackUrl;
+  }
 
   const form = useForm<Schema>({
     resolver: zodResolver(LoginSchema),
@@ -43,6 +62,7 @@ export function LoginForm({ className, ...props }: { className?: string }) {
 
   const onSubmit = async (data: Schema) => {
     try {
+      setMessage({ status: true, message: "" });
       const result = await api.post("/auth/login", data);
       if (!result.status) {
         setMessage({ status: false, message: result.message });
@@ -52,11 +72,16 @@ export function LoginForm({ className, ...props }: { className?: string }) {
         type: "success",
         title: result.message,
       });
+      // Invalidate and refetch user data to sync account state
       await queryClient.invalidateQueries({ queryKey: ["getUser"] });
-      route.push("/");
+      await queryClient.refetchQueries({ queryKey: ["getUser"] });
+      route.push(getRedirectUrl());
     } catch (error: any) {
-      console.log(error);
-      setMessage({ status: false, message: error?.message });
+      console.error("Login error:", error);
+      setMessage({
+        status: false,
+        message: error?.message || "Something went wrong. Please try again.",
+      });
     }
   };
 
