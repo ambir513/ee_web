@@ -487,7 +487,10 @@ export function AddressTab({ isActive = true }: { isActive?: boolean }) {
         throw new Error(response?.message || "Failed to load addresses");
       }
 
-      return (response.data || []).map((addr: any) => ({
+      const rawData = response.data;
+      if (!Array.isArray(rawData)) return [] as AddressData[];
+
+      return rawData.map((addr: any) => ({
         ...addr,
         pinCode: addr.pinCode?.toString() || "",
         phoneNo: addr.phoneNo?.toString() || "",
@@ -509,7 +512,7 @@ export function AddressTab({ isActive = true }: { isActive?: boolean }) {
     wasActiveRef.current = isActive;
   }, [isActive, refetch]);
 
-  const canAddMore = addresses.length < MAX_ADDRESSES;
+  const canAddMore = !Array.isArray(addresses) ? true : addresses.length < MAX_ADDRESSES;
 
   // Create address mutation
   const createMutation = useMutation({
@@ -643,7 +646,7 @@ export function AddressTab({ isActive = true }: { isActive?: boolean }) {
   }
 
   if (editingId) {
-    const addressToEdit = addresses.find((a) => a._id === editingId);
+    const addressToEdit = Array.isArray(addresses) ? addresses.find((a) => a._id === editingId) : undefined;
     if (addressToEdit) {
       return (
         <AddressForm
@@ -686,7 +689,7 @@ export function AddressTab({ isActive = true }: { isActive?: boolean }) {
 
       <Separator className="my-5" />
 
-      {addresses.length === 0 ? (
+      {!Array.isArray(addresses) || addresses.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-12 text-center">
           <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-muted">
             <MapPin className="h-6 w-6 text-muted-foreground" />
@@ -704,7 +707,7 @@ export function AddressTab({ isActive = true }: { isActive?: boolean }) {
         </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2">
-          {addresses.map((address) => (
+          {Array.isArray(addresses) && addresses.map((address) => (
             <AddressCard
               key={address._id}
               address={address}

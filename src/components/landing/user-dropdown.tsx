@@ -1,9 +1,7 @@
 "use client";
 import {
-  HelpCircle,
   LogOut,
   ScrollText,
-  Settings,
   ShieldUser,
   User,
 } from "lucide-react";
@@ -23,7 +21,6 @@ import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
-import { IoMdHeartEmpty } from "react-icons/io";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { api } from "@/lib/api";
@@ -133,27 +130,6 @@ const UserDropdown = ({ user }: { user: any }) => {
 
           </DropdownMenuItem>
 
-          <DropdownMenuItem render={
-            <Link href="/account#wishlist" className="w-full flex items-center gap-x-1.5 cursor-pointer">
-              <IoMdHeartEmpty />
-              My Wishlist
-            </Link>
-          }>
-
-          </DropdownMenuItem>
-
-          <DropdownMenuItem render={
-            <Link href="/account#personal" className="w-full flex items-center gap-x-1.5 cursor-pointer">
-              <Settings />
-              Settings
-            </Link>
-          }>
-
-          </DropdownMenuItem>
-          <DropdownMenuItem>
-            <HelpCircle />
-            Help
-          </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem
             variant={isLoading ? "default" : "destructive"}

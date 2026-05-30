@@ -226,7 +226,7 @@ export function CartTab() {
   const items: CartItem[] = (Array.isArray(cartData?.data) ? cartData.data : []).filter(
     (item: CartItem) => item.productId != null,
   );
-  const addresses: AddressData[] = (addressData?.data || []).map((a: any) => a);
+  const addresses: AddressData[] = (Array.isArray(addressData?.data) ? addressData.data : []).map((a: any) => a);
   const user = userData?.data;
 
   const updateQuantity = (itemId: string, delta: number) => {

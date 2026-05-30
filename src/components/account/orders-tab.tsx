@@ -134,7 +134,7 @@ export function OrdersTab() {
     staleTime: 2 * 60 * 1000,
   });
 
-  const orders: OrderData[] = ordersData?.status ? ordersData.data || [] : [];
+  const orders: OrderData[] = ordersData?.status && Array.isArray(ordersData.data) ? ordersData.data : [];
 
   const getLatestStatus = (order: OrderData): OrderStatusType => {
     if (!order.statusHistory || order.statusHistory.length === 0) return "Order";

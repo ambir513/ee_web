@@ -374,7 +374,7 @@ export default function ProductPage({ params }: ProductPageProps) {
   const queryClient = useQueryClient();
   const router = useRouter();
   const redirectToLogin = useAuthRedirect();
-  const { data: userData } = useQuery({
+  const { data: userData, isLoading: isUserLoading } = useQuery({
     queryKey: ["getUser"],
     queryFn: () => api.get("/account/me", { queryClient }),
     staleTime: 5 * 60 * 1000,
@@ -382,7 +382,8 @@ export default function ProductPage({ params }: ProductPageProps) {
     refetchOnMount: false,
     refetchOnWindowFocus: false,
   });
-  const isLoggedIn = userData?.status === true;
+  // Only treat as "not logged in" after the query has settled
+  const isLoggedIn = isUserLoading ? true : userData?.status === true;
 
   /* ======================================================================= */
   /* FETCH PRODUCT */

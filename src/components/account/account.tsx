@@ -92,9 +92,12 @@ export function Account() {
   }
 
   // Redirect if not authenticated instead of showing error
-  if (isError || !userData?.status) {
+  // Only redirect after the query has settled (not while loading/pending)
+  if (!isLoading && (isError || !userData?.status)) {
     if (typeof window !== "undefined") {
-      const callbackUrl = encodeURIComponent(window.location.pathname);
+      // Preserve hash fragment in the callback URL so user returns to the correct tab
+      const hash = window.location.hash || "";
+      const callbackUrl = encodeURIComponent(window.location.pathname + hash);
       window.location.href = `/login?callbackUrl=${callbackUrl}`;
     }
     return (
